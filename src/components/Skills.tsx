@@ -3,19 +3,24 @@
 import { motion } from 'framer-motion'
 import { skills } from '@/lib/data'
 
-const categoryColors = {
-  frontend: 'from-primary-500 to-primary-600',
-  backend: 'from-accent-500 to-accent-600',
-  tools: 'from-secondary-500 to-secondary-600',
-  other: 'from-gray-500 to-gray-600',
+const categoryColors: Record<string, string> = {
+  Languages: 'from-primary-500 to-primary-600',
+  Frameworks: 'from-accent-500 to-accent-600',
+  Tools: 'from-secondary-500 to-secondary-600',
+  Other: 'from-gray-500 to-gray-600',
+  'Support Engineering': 'from-emerald-500 to-emerald-600',
+  'Support Manager': 'from-blue-500 to-blue-600',
+  'Product Manager': 'from-purple-500 to-purple-600',
 }
 
 export default function Skills() {
   const skillsByCategory = {
-    frontend: skills.filter((s) => s.category === 'frontend'),
-    backend: skills.filter((s) => s.category === 'backend'),
-    tools: skills.filter((s) => s.category === 'tools'),
-    other: skills.filter((s) => s.category === 'other'),
+    'Product Manager': skills.filter((s) => s.category === 'Product Manager'),
+    'Support Manager': skills.filter((s) => s.category === 'Support Manager'),
+    'Support Engineering': skills.filter((s) => s.category === 'Support Engineering'),
+    Languages: skills.filter((s) => s.category === 'Languages'),
+    Frameworks: skills.filter((s) => s.category === 'Frameworks'),
+    Tools: skills.filter((s) => s.category === 'Tools'),
   }
 
   return (

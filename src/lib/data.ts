@@ -29,7 +29,7 @@ export interface Education {
 export interface Skill {
   name: string;
   level: number; // 0-100
-  category: 'frontend' | 'backend' | 'tools' | 'other';
+  category: 'Languages' | 'Frameworks' | 'Tools' | 'Other' | 'Support Engineering' | 'Support Manager' | 'Product Manager';
 }
 
 export interface BlogPost {
@@ -44,39 +44,39 @@ export interface BlogPost {
 export const projects: Project[] = [
   {
     id: '1',
-    title: 'E-Commerce Platform',
-    description: 'A full-stack e-commerce solution with payment integration, user authentication, and admin dashboard.',
-    technologies: ['Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Stripe'],
+    title: 'Customer Session Analyser',
+    description: 'Record keeping for all the customer interactions with the product and making insights out of it.',
+    technologies: ['Python', 'Flask', 'PostgreSQL', 'Analytics'],
     image: '/images/project1.jpg',
-    link: 'https://example.com',
-    github: 'https://github.com/example',
+    link: 'https://customersessionanalyser-production.up.railway.app/',
+    github: 'https://github.com/Legolasan/customer_session_analyser',
   },
   {
     id: '2',
-    title: 'Task Management App',
-    description: 'A collaborative task management application with real-time updates and team collaboration features.',
-    technologies: ['React', 'Firebase', 'Material-UI', 'Redux'],
+    title: 'Zendesk Test Case Generation',
+    description: 'Create test cases from the Zendesk tickets for regression and functional testing.',
+    technologies: ['Python', 'Zendesk API', 'Test Automation'],
     image: '/images/project2.jpg',
-    link: 'https://example.com',
-    github: 'https://github.com/example',
+    link: 'https://zendeskanalyser-production.up.railway.app/',
+    github: 'https://github.com/Legolasan/zendesk_analyser',
   },
   {
     id: '3',
-    title: 'Weather Dashboard',
-    description: 'A beautiful weather dashboard with location-based forecasts and interactive maps.',
-    technologies: ['Vue.js', 'OpenWeather API', 'Chart.js', 'Tailwind CSS'],
+    title: 'Snowflake Key Rotation',
+    description: 'Rotate the Snowflake key-pairs from your terminal. Available as a PyPI package.',
+    technologies: ['Python', 'Snowflake', 'CLI', 'PyPI'],
     image: '/images/project3.jpg',
-    link: 'https://example.com',
-    github: 'https://github.com/example',
+    link: 'https://pypi.org/project/sf-rotation/',
+    github: 'https://github.com/Legolasan/sf_rotation',
   },
   {
     id: '4',
-    title: 'Social Media Analytics',
-    description: 'Analytics platform for tracking social media performance with detailed insights and reports.',
-    technologies: ['Python', 'Django', 'React', 'D3.js', 'PostgreSQL'],
+    title: 'Weekly Reporting',
+    description: 'Space where you can track your work items week over week.',
+    technologies: ['Python', 'Flask', 'PostgreSQL', 'Productivity'],
     image: '/images/project4.jpg',
-    link: 'https://example.com',
-    github: 'https://github.com/example',
+    link: 'https://weeklyreporting-production.up.railway.app',
+    github: 'https://github.com/Legolasan/weekly_reporting',
   },
 ];
 
@@ -179,25 +179,35 @@ export const education: Education[] = [
 ];
 
 export const skills: Skill[] = [
-  // Frontend
-  { name: 'React', level: 90, category: 'frontend' },
-  { name: 'Next.js', level: 85, category: 'frontend' },
-  { name: 'TypeScript', level: 88, category: 'frontend' },
-  { name: 'JavaScript', level: 92, category: 'frontend' },
-  { name: 'HTML/CSS', level: 95, category: 'frontend' },
-  { name: 'Tailwind CSS', level: 90, category: 'frontend' },
-  { name: 'Vue.js', level: 75, category: 'frontend' },
-  // Backend
-  { name: 'Node.js', level: 85, category: 'backend' },
-  { name: 'Python', level: 80, category: 'backend' },
-  { name: 'PostgreSQL', level: 75, category: 'backend' },
-  { name: 'MongoDB', level: 70, category: 'backend' },
-  { name: 'Express.js', level: 85, category: 'backend' },
+  // Languages
+  { name: 'Python', level: 50, category: 'Languages' },
+  { name: 'SQL', level: 50, category: 'Languages' },
+  // Frameworks
+  { name: 'Flask', level: 50, category: 'Frameworks' },
+  { name: 'FastAPI', level: 50, category: 'Frameworks' },
   // Tools
-  { name: 'Git', level: 90, category: 'tools' },
-  { name: 'Docker', level: 75, category: 'tools' },
-  { name: 'AWS', level: 70, category: 'tools' },
-  { name: 'CI/CD', level: 80, category: 'tools' },
+  { name: 'Git', level: 50, category: 'Tools' },
+  { name: 'Docker', level: 50, category: 'Tools' },
+  { name: 'AWS', level: 50, category: 'Tools' },
+  { name: 'CI/CD', level: 50, category: 'Tools' },
+  // Support Engineering
+  { name: 'Customer Satisfaction', level: 100, category: 'Support Engineering' },
+  { name: 'Customer Advocacy', level: 100, category: 'Support Engineering' },
+  { name: 'Time Management', level: 100, category: 'Support Engineering' },
+  { name: 'Escalation Handling', level: 100, category: 'Support Engineering' },
+  // Support Manager
+  { name: 'Customer Empathy', level: 100, category: 'Support Manager' },
+  { name: 'Team Performance Management', level: 100, category: 'Support Manager' },
+  { name: 'Stakeholder Management', level: 100, category: 'Support Manager' },
+  { name: 'Feedback Loop', level: 100, category: 'Support Manager' },
+  { name: 'Coaching & Mentorship', level: 100, category: 'Support Manager' },
+  // Product Manager
+  { name: 'Strategic Thinking', level: 100, category: 'Product Manager' },
+  { name: 'Data Driven Decisions', level: 100, category: 'Product Manager' },
+  { name: 'Communication & Leadership', level: 100, category: 'Product Manager' },
+  { name: 'Prioritization', level: 100, category: 'Product Manager' },
+  { name: 'Adaptability', level: 100, category: 'Product Manager' },
+  { name: 'Execution', level: 100, category: 'Product Manager' },
 ];
 
 export const blogPosts: BlogPost[] = [
