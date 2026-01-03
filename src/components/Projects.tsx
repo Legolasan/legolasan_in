@@ -37,8 +37,18 @@ export default function Projects() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
             >
-              <div className="h-48 bg-gradient-to-br from-primary-400 via-accent-400 to-secondary-400 flex items-center justify-center">
-                <div className="text-white text-4xl font-bold">
+              <div className="h-48 bg-gradient-to-br from-primary-400 via-accent-400 to-secondary-400 relative overflow-hidden">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to gradient with letter if image fails
+                    e.currentTarget.style.display = 'none'
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                  }}
+                />
+                <div className="hidden absolute inset-0 flex items-center justify-center text-white text-4xl font-bold">
                   {project.title.charAt(0)}
                 </div>
               </div>
