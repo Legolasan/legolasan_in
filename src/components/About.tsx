@@ -35,7 +35,16 @@ export default function About() {
               <div className="relative w-full aspect-square max-w-md mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-accent-400 rounded-3xl transform rotate-6"></div>
                 <div className="relative bg-gray-200 rounded-3xl overflow-hidden shadow-2xl">
-                  <div className="w-full h-full bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center text-6xl font-bold text-gray-400">
+                  <img
+                    src="/images/profile.jpeg"
+                    alt={personalInfo.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                    }}
+                  />
+                  <div className="hidden w-full h-full bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center text-6xl font-bold text-gray-400">
                     {personalInfo.name.charAt(0)}
                   </div>
                 </div>
