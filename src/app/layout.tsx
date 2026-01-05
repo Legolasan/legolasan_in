@@ -4,6 +4,7 @@ import './globals.css'
 import SessionProvider from '@/components/providers/SessionProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 import Analytics from '@/components/Analytics'
+import ChatBot from '@/components/ChatBot'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -42,6 +43,7 @@ export default function RootLayout({
           <SessionProvider>
             <Analytics />
             {children}
+            <ChatBot />
           </SessionProvider>
         </ThemeProvider>
       </body>
