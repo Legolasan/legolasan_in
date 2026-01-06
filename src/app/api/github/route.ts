@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { rateLimiters, getClientIP } from '@/lib/rateLimit'
 
 // Cache the GitHub data for 1 hour
 let cachedData: any = null
@@ -118,8 +119,20 @@ async function fetchGitHubData() {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIP(request)
+    const { success } = rateLimiters.relaxed.check(ip)
+    
+    if (!success) {
+      // If rate limited but have cached data, return it
+      if (cachedData) {
+        return NextResponse.json({ ...cachedData, rateLimited: true })
+      }
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
     // Check if we have valid cached data
     const now = Date.now()
     if (cachedData && now - cacheTime < CACHE_DURATION) {

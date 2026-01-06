@@ -4,18 +4,26 @@ import GitHubProvider from 'next-auth/providers/github'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/db'
 
-// Validate environment variables at startup
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  console.warn('[WARN] Google OAuth credentials not configured')
-}
-if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
-  console.warn('[WARN] GitHub OAuth credentials not configured')
-}
-if (!process.env.NEXTAUTH_URL) {
-  console.warn('[WARN] NEXTAUTH_URL not configured')
-}
-if (!process.env.NEXTAUTH_SECRET) {
-  console.warn('[WARN] NEXTAUTH_SECRET not configured')
+// Helper for development-only logging
+const isDev = process.env.NODE_ENV === 'development'
+const devLog = (...args: any[]) => isDev && console.log(...args)
+const devWarn = (...args: any[]) => isDev && console.warn(...args)
+const devError = (...args: any[]) => isDev && console.error(...args)
+
+// Validate environment variables at startup (dev only)
+if (isDev) {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    devWarn('[WARN] Google OAuth credentials not configured')
+  }
+  if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+    devWarn('[WARN] GitHub OAuth credentials not configured')
+  }
+  if (!process.env.NEXTAUTH_URL) {
+    devWarn('[WARN] NEXTAUTH_URL not configured')
+  }
+  if (!process.env.NEXTAUTH_SECRET) {
+    devWarn('[WARN] NEXTAUTH_SECRET not configured')
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -42,10 +50,10 @@ export const authOptions: NextAuthOptions = {
             where: { id: user.id },
             data: { role: 'admin' },
           })
-          console.log(`First user ${user.email} set as admin`)
+          devLog(`First user ${user.email} set as admin`)
         }
       } catch (error) {
-        console.error('Error setting admin role:', error)
+        devError('Error setting admin role:', error)
       }
     },
     async linkAccount({ account, user }) {
@@ -62,13 +70,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log('[AUTH] signIn callback called:', {
-        email: user.email,
-        provider: account?.provider,
-        accountId: account?.providerAccountId,
-      })
-      
+    async signIn({ user, account }) {
       // Let PrismaAdapter handle account linking with allowDangerousEmailAccountLinking enabled
       // Just update provider info in User model if needed
       if (user.email && account) {
@@ -78,8 +80,6 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (existingUser) {
-            console.log('[AUTH] Existing user found:', { id: existingUser.id, role: existingUser.role })
-            
             // Update provider info if not set or different
             if (!existingUser.provider || existingUser.provider !== account.provider) {
               await prisma.user.update({
@@ -89,7 +89,6 @@ export const authOptions: NextAuthOptions = {
                   providerId: account.providerAccountId,
                 },
               })
-              console.log('[AUTH] Updated provider info for user')
             }
 
             // Ensure first user has admin role
@@ -99,18 +98,15 @@ export const authOptions: NextAuthOptions = {
                 where: { id: existingUser.id },
                 data: { role: 'admin' },
               })
-              console.log(`[AUTH] First user ${user.email} set as admin`)
             }
-          } else {
-            console.log('[AUTH] New user signing in:', user.email)
           }
         } catch (error) {
-          console.error('[AUTH] Error in signIn callback:', error)
+          devError('[AUTH] Error in signIn callback:', error)
         }
       }
       return true
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user }) {
       // JWT callback - called on every request with JWT strategy
       if (user) {
         // First time sign in - get role from database
@@ -121,7 +117,6 @@ export const authOptions: NextAuthOptions = {
         token.id = dbUser?.id || user.id
         token.role = dbUser?.role || 'user'
         token.email = user.email
-        console.log('[AUTH] JWT populated on sign in:', { id: token.id, role: token.role, email: token.email })
       } else if (token.email) {
         // Subsequent requests - refresh role from database to catch updates
         const dbUser = await prisma.user.findUnique({
@@ -154,4 +149,3 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 }
-
