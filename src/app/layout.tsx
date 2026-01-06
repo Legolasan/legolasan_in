@@ -43,7 +43,7 @@ export default function RootLayout({
           <SessionProvider>
             <Analytics />
             {children}
-            <ChatBot />
+            {/* <ChatBot /> */}{/* Hidden for now */}
           </SessionProvider>
         </ThemeProvider>
       </body>
