@@ -10,9 +10,12 @@ const MAX_MESSAGE_LENGTH = 1000
 const MAX_SESSION_ID_LENGTH = 100
 const MAX_MESSAGES_COUNT = 20
 const MAX_QUESTIONS_PER_SESSION = 10
+const MAX_QUESTIONS_PER_IP_PER_DAY = 20
 
-// Limit reached response
-const LIMIT_REACHED_MESSAGE = `Thanks for your interest! You've reached the question limit for this session (${MAX_QUESTIONS_PER_SESSION} questions). For more detailed questions or to continue the conversation, please email me at ${personalInfo.email} or use the contact form below. I'd love to hear from you! 😊`
+// Limit reached responses
+const SESSION_LIMIT_MESSAGE = `Thanks for your interest! You've reached the question limit for this session (${MAX_QUESTIONS_PER_SESSION} questions). For more detailed questions or to continue the conversation, please email me at ${personalInfo.email} or use the contact form below. I'd love to hear from you! 😊`
+
+const DAILY_LIMIT_MESSAGE = `You've reached the daily question limit (${MAX_QUESTIONS_PER_IP_PER_DAY} questions). Please come back tomorrow or email me at ${personalInfo.email} for more detailed questions. I'd love to connect with you directly! 📧`
 
 // Build context from portfolio data
 function buildContext(): string {
@@ -174,6 +177,26 @@ async function countUserQuestions(dbSessionId: string): Promise<number> {
   }
 }
 
+// Count user questions from an IP in the last 24 hours
+async function countQuestionsFromIP(ip: string): Promise<number> {
+  try {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const count = await prisma.chatMessage.count({
+      where: {
+        role: 'user',
+        createdAt: { gte: oneDayAgo },
+        session: { ipAddress: ip },
+      },
+    })
+    return count
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error counting questions from IP:', error)
+    }
+    return 0
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting using centralized limiter
@@ -254,31 +277,39 @@ export async function POST(request: NextRequest) {
       await saveMessage(dbSessionId, 'user', latestUserMessage.content)
     }
 
-    // Check if user has reached the question limit
-    if (dbSessionId) {
-      const questionCount = await countUserQuestions(dbSessionId)
-      
-      if (questionCount > MAX_QUESTIONS_PER_SESSION) {
-        // Save the limit message as assistant response
-        await saveMessage(dbSessionId, 'assistant', LIMIT_REACHED_MESSAGE)
-        
-        // Return a streamed response with the limit message
-        const encoder = new TextEncoder()
-        const limitStream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: LIMIT_REACHED_MESSAGE })}\n\n`))
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-            controller.close()
-          },
-        })
+    // Helper function to return a limit response
+    const returnLimitResponse = (message: string) => {
+      if (dbSessionId) {
+        saveMessage(dbSessionId, 'assistant', message).catch(() => {})
+      }
+      const encoder = new TextEncoder()
+      const limitStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: message })}\n\n`))
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+          controller.close()
+        },
+      })
+      return new Response(limitStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Connection': 'keep-alive',
+        },
+      })
+    }
 
-        return new Response(limitStream, {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Connection': 'keep-alive',
-          },
-        })
+    // Check daily IP limit first (prevents bypassing by clearing session)
+    const ipQuestionCount = await countQuestionsFromIP(ip)
+    if (ipQuestionCount > MAX_QUESTIONS_PER_IP_PER_DAY) {
+      return returnLimitResponse(DAILY_LIMIT_MESSAGE)
+    }
+
+    // Check session limit
+    if (dbSessionId) {
+      const sessionQuestionCount = await countUserQuestions(dbSessionId)
+      if (sessionQuestionCount > MAX_QUESTIONS_PER_SESSION) {
+        return returnLimitResponse(SESSION_LIMIT_MESSAGE)
       }
     }
 
