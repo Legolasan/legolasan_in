@@ -36,11 +36,11 @@ export default function Experience() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                className={`relative mb-12 ${
-                  index % 2 === 0 ? 'md:pr-[50%] md:pr-8' : 'md:ml-[50%] md:pl-8'
+                className={`relative mb-12 md:w-[calc(50%-2rem)] ${
+                  index % 2 === 0 ? '' : 'md:ml-auto'
                 }`}
               >
-                {/* Timeline Dot */}
+                {/* Timeline Dot - Positioned on the center timeline */}
                 <div className="absolute left-8 md:left-1/2 w-4 h-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full border-4 border-white shadow-lg transform -translate-x-1/2 -translate-y-1"></div>
 
                 <div className="ml-16 md:ml-0 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300">
