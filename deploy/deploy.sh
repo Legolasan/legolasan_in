@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-SERVER="root@195.35.22.87"
+SERVER="ubuntu@195.35.22.87"
 REMOTE_DIR="/var/www/portfolio"
 LOCAL_DIR="$(pwd)"
 
@@ -16,33 +16,33 @@ echo "🚀 Starting deployment..."
 echo "🔍 Checking Node.js installation..."
 if ! ssh $SERVER "command -v node > /dev/null 2>&1"; then
     echo "📦 Node.js not found. Installing Node.js 18.x..."
-    ssh $SERVER "curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs"
+    ssh $SERVER "curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash - && sudo apt-get install -y nodejs"
 fi
 
 # Check and install PM2 if needed
 if ! ssh $SERVER "command -v pm2 > /dev/null 2>&1"; then
     echo "📦 Installing PM2..."
-    ssh $SERVER "npm install -g pm2"
+    ssh $SERVER "sudo npm install -g pm2"
 fi
 
 # Check and install Nginx if needed
 if ! ssh $SERVER "command -v nginx > /dev/null 2>&1"; then
     echo "📦 Installing Nginx..."
-    ssh $SERVER "apt-get update && apt-get install -y nginx"
+    ssh $SERVER "sudo apt-get update && sudo apt-get install -y nginx"
 fi
 
 # Check and install Certbot if needed
 echo "🔍 Checking Certbot installation..."
 if ! ssh $SERVER "command -v certbot > /dev/null 2>&1"; then
     echo "📦 Installing Certbot..."
-    ssh $SERVER "apt-get update && apt-get install -y certbot python3-certbot-nginx"
+    ssh $SERVER "sudo apt-get update && sudo apt-get install -y certbot python3-certbot-nginx"
 fi
 
 # Check and install PostgreSQL if needed
 echo "🔍 Checking PostgreSQL installation..."
 if ! ssh $SERVER "command -v psql > /dev/null 2>&1"; then
     echo "📦 Installing PostgreSQL..."
-    ssh $SERVER "apt-get update && apt-get install -y postgresql postgresql-contrib"
+    ssh $SERVER "sudo apt-get update && sudo apt-get install -y postgresql postgresql-contrib"
     echo "✅ PostgreSQL installed. Please configure database and update DATABASE_URL in .env"
 fi
 
@@ -60,7 +60,7 @@ npm run build
 
 # Create remote directory if it doesn't exist
 echo "📁 Creating remote directory..."
-ssh $SERVER "mkdir -p $REMOTE_DIR"
+ssh $SERVER "sudo mkdir -p $REMOTE_DIR && sudo chown -R ubuntu:ubuntu $REMOTE_DIR"
 
 # Copy built files to server
 echo "📤 Uploading files to server..."
