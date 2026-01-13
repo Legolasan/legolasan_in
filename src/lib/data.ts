@@ -41,6 +41,16 @@ export interface BlogPost {
   slug: string;
 }
 
+export interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  link: string;
+  technologies?: string[];
+}
+
 export const projects: Project[] = [
   {
     id: '1',
@@ -230,6 +240,45 @@ export const blogPosts: BlogPost[] = [
     date: '2024-01-05',
     readTime: '6 min read',
     slug: 'building-responsive-uis-with-tailwind',
+  },
+];
+
+export const tools: Tool[] = [
+  {
+    id: '1',
+    name: 'Customer Session Analyser',
+    description: 'Track and analyze customer interactions with products to derive actionable insights. Perfect for support teams and product managers.',
+    category: 'Analytics',
+    icon: '📊',
+    link: 'https://github.com/Legolasan/customer_session_analyser',
+    technologies: ['Python', 'Flask', 'PostgreSQL'],
+  },
+  {
+    id: '2',
+    name: 'Zendesk Test Case Generator',
+    description: 'Automatically generate test cases from Zendesk tickets for regression and functional testing. Streamlines QA workflows.',
+    category: 'Testing & QA',
+    icon: '🧪',
+    link: 'https://github.com/Legolasan/zendesk_analyser',
+    technologies: ['Python', 'Zendesk API'],
+  },
+  {
+    id: '3',
+    name: 'Snowflake Key Rotation CLI',
+    description: 'Rotate Snowflake key-pairs directly from your terminal. Published as a PyPI package for easy installation and use.',
+    category: 'Security & DevOps',
+    icon: '🔐',
+    link: 'https://github.com/Legolasan/sf_rotation',
+    technologies: ['Python', 'Snowflake', 'PyPI'],
+  },
+  {
+    id: '4',
+    name: 'Weekly Reporting Tracker',
+    description: 'Personal productivity tool to track work items week over week. Stay organized and never miss important tasks.',
+    category: 'Productivity',
+    icon: '📝',
+    link: 'https://github.com/Legolasan/weekly_reporting',
+    technologies: ['Python', 'Flask', 'PostgreSQL'],
   },
 ];
 
