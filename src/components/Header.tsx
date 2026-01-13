@@ -7,13 +7,13 @@ import ThemeToggle from './ThemeToggle'
 import ResumeModal from './ResumeModal'
 
 const navItems = [
-  { name: 'Home', href: '#home' },
-  { name: 'About', href: '#about' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Education', href: '#education' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Home', href: '/' },
+  { name: 'About', href: '/#about' },
+  { name: 'Projects', href: '/#projects' },
+  { name: 'Skills', href: '/#skills' },
+  { name: 'Experience', href: '/#experience' },
+  { name: 'Education', href: '/#education' },
+  { name: 'Contact', href: '/#contact' },
   { name: 'Blog', href: '/blogs' },
   { name: 'Tools', href: '/tools' },
   // { name: 'Services', href: '/services' }, // Hidden for now
@@ -46,7 +46,7 @@ export default function Header() {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link
-            href="#home"
+            href="/"
             className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent"
           >
             Portfolio
