@@ -16,7 +16,10 @@ npm run build            # Build (includes prisma generate)
 npm run lint             # ESLint
 npm run prisma:migrate   # Run migrations (dev mode)
 npm run prisma:studio    # Open Prisma UI at :5555
-npm run deploy           # Deploy to VPS via SSH
+
+# Deployment (auto via GitHub Actions on push)
+git push                 # Auto-deploys to VPS via GitHub Actions
+./deploy/deploy.sh       # Manual fallback if Actions fails
 ```
 
 ## Architecture
@@ -85,7 +88,11 @@ Flask apps served under a subpath need proper URL generation. Requirements:
 2. WSGI wrapper uses `ProxyFix(app.wsgi_app, x_prefix=1)` to read the header
 3. Templates must use `url_for()` instead of hardcoded URLs
 
-**Note:** Template fixes for sql_learn are applied on the server. If `git pull` overwrites them, re-run:
+**Pending:** Push `url_for()` template fixes to the sql_learn repo so they persist:
+- `app/templates/base.html`: Change `href="/"` → `href="{{ url_for('main.index') }}"`
+- `app/templates/base.html` & `index.html`: Change `href="/concept/{{ concept.name }}"` → `href="{{ url_for('concepts.show_concept', concept_name=concept.name) }}"`
+
+**Temporary workaround** (if fixes aren't in repo yet):
 ```bash
 ssh ubuntu@195.35.22.87 << 'EOF'
 cd /home/ubuntu/apps/sql_learn/app/templates
@@ -141,29 +148,56 @@ Required in `.env`:
 
 ## Deployment
 
+### GitHub as Source of Truth
+
+Both apps deploy from GitHub repositories:
+
+```
+┌─────────────┐     git push      ┌─────────────┐   GitHub Actions    ┌─────────────┐
+│   Local     │  ──────────────►  │   GitHub    │  ───────────────►   │    VPS      │
+│   Machine   │                   │   Repos     │    (auto-deploy)    │   Server    │
+└─────────────┘                   └─────────────┘                     └─────────────┘
+                                        │
+                                        ├── legolasan_in (portfolio)
+                                        └── sql_learn (mysql learning)
+```
+
+| App | GitHub Repo | VPS Path |
+|-----|-------------|----------|
+| Portfolio | `Legolasan/legolasan_in` | `/var/www/portfolio` |
+| MySQL Learning | `Legolasan/sql_learn` | `/home/ubuntu/apps/sql_learn` |
+
+### Auto-Deploy via GitHub Actions
+
+**On every `git push` to main:**
+1. GitHub Actions triggers (`.github/workflows/deploy.yml`)
+2. SSH into VPS
+3. `git pull` → `npm ci` → `prisma migrate` → `npm run build` → `pm2 restart`
+
+**GitHub Secrets Required** (Settings → Secrets → Actions):
+- `VPS_HOST`: `195.35.22.87`
+- `VPS_USER`: `ubuntu`
+- `VPS_SSH_KEY`: SSH private key contents
+
 ### VPS Infrastructure
 
-- **Server:** `ubuntu@195.35.22.87` (Ubuntu)
+- **Server:** `ubuntu@195.35.22.87` (Ubuntu 22.04)
 - **Domain:** https://legolasan.in
-- **Process Manager:** PM2 (both Node.js and Python apps)
-- **Web Server:** Nginx (reverse proxy + SSL)
+- **Process Manager:** PM2 (Node.js + Python apps)
+- **Web Server:** Nginx (reverse proxy + SSL via Let's Encrypt)
 
-### Deployment Scripts
+### Deployment Scripts (Manual Fallback)
 
 | Script | Purpose |
 |--------|---------|
-| `deploy/deploy.sh` | Main Next.js app deployment |
+| `deploy/deploy.sh` | Manual deploy - runs `git pull` + build on VPS |
 | `deploy/deploy-learn-apps.sh` | Flask learning apps deployment |
 
-### Main App Deployment
-
-`npm run deploy` or `./deploy/deploy.sh` handles:
-1. rsync files to VPS
-2. Install npm dependencies
-3. Run Prisma migrations
-4. Build Next.js app
-5. Configure Nginx + SSL (Let's Encrypt)
-6. Restart PM2 processes
+Use manual scripts if GitHub Actions fails:
+```bash
+./deploy/deploy.sh              # Portfolio
+./deploy/deploy-learn-apps.sh   # MySQL Learning
+```
 
 ### Nginx Configuration
 
@@ -180,7 +214,12 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 
-**Always run `npm run deploy` after making fixes to push changes to production.**
+### Deployment Workflow
+
+1. Make changes locally
+2. `git add . && git commit -m "message"`
+3. `git push` → Auto-deploys via GitHub Actions
+4. Check https://github.com/Legolasan/legolasan_in/actions for status
 
 ## Pending Updates (Draft)
 
