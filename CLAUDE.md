@@ -114,6 +114,17 @@ EOF
 - **CSP Headers:** Configured in `next.config.js`. Add external domains to `connect-src` when needed (e.g., cdn.jsdelivr.net for map data).
 - **Rate limiting:** Use `rateLimiters.chat`, `.standard`, `.strict`, `.relaxed`, `.analytics` from `rateLimit.ts`. Get client IP with `getClientIP(request)`.
 - **Chat API:** SSE streaming with OpenAI, 10 questions/session, 20 questions/IP/day. Uses `ReadableStream` for real-time responses.
+- **Google Analytics 4:** Measurement ID `G-0R0F7W8JC4`. Configured in `src/app/layout.tsx` using Next.js `Script` component. **Important:** GA4 only tracks Next.js pages automatically. For non-Next.js pages (Flask apps, external learning modules), you must manually add the gtag script to their base template:
+  ```html
+  <!-- Add to <head> of Flask base.html or other templates -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0R0F7W8JC4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0R0F7W8JC4');
+  </script>
+  ```
 
 ## Database
 
