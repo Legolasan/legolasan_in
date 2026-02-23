@@ -114,6 +114,42 @@ export async function GET(request: NextRequest) {
       take: 10,
     })
 
+    // Visitor locations (country + city)
+    const visitorLocations = await prisma.pageView.groupBy({
+      by: ['country', 'city'],
+      where: {
+        createdAt: { gte: startDate },
+        country: { not: null },
+      },
+      _count: {
+        country: true,
+      },
+      orderBy: {
+        _count: {
+          country: 'desc',
+        },
+      },
+      take: 50,
+    })
+
+    // Top countries
+    const topCountries = await prisma.pageView.groupBy({
+      by: ['country'],
+      where: {
+        createdAt: { gte: startDate },
+        country: { not: null },
+      },
+      _count: {
+        country: true,
+      },
+      orderBy: {
+        _count: {
+          country: 'desc',
+        },
+      },
+      take: 10,
+    })
+
     return NextResponse.json({
       totalViews,
       uniqueVisitors: uniqueVisitors.length,
@@ -136,6 +172,15 @@ export async function GET(request: NextRequest) {
       topReferrers: topReferrers.map((r) => ({
         referrer: r.referrer,
         count: r._count.referrer,
+      })),
+      visitorLocations: visitorLocations.map((l) => ({
+        country: l.country,
+        city: l.city,
+        count: l._count.country,
+      })),
+      topCountries: topCountries.map((c) => ({
+        country: c.country,
+        count: c._count.country,
       })),
     })
   } catch (error) {

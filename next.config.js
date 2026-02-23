@@ -43,7 +43,7 @@ const nextConfig = {
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com",
           "font-src 'self' https://fonts.gstatic.com",
           "img-src 'self' data: https: blob:",
-          "connect-src 'self' https://api.emailjs.com https://api.github.com https://calendly.com https://api.openai.com",
+          "connect-src 'self' https://api.emailjs.com https://api.github.com https://calendly.com https://api.openai.com https://cdn.jsdelivr.net",
           "frame-src 'self' https://calendly.com",
           "frame-ancestors 'none'",
         ].join('; '),

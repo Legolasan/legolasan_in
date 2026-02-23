@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { UAParser } from 'ua-parser-js'
 import { rateLimiters, getClientIP } from '@/lib/rateLimit'
+import { getGeoFromIP } from '@/lib/geoLookup'
 
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
     const ip = getClientIP(request)
     const { success } = rateLimiters.analytics.check(ip)
-    
+
     if (!success) {
       return NextResponse.json({ success: false, error: 'Rate limited' }, { status: 429 })
     }
@@ -26,6 +27,9 @@ export async function POST(request: NextRequest) {
     const parser = new UAParser(userAgent)
     const result = parser.getResult()
 
+    // Get geo data from IP (non-blocking)
+    const geoData = await getGeoFromIP(ip)
+
     await prisma.pageView.create({
       data: {
         pagePath: pagePath.substring(0, 500) || '/',
@@ -35,6 +39,8 @@ export async function POST(request: NextRequest) {
         browser: result.browser.name || 'unknown',
         os: result.os.name || 'unknown',
         sessionId: typeof sessionId === 'string' ? sessionId.substring(0, 100) : null,
+        country: geoData.country?.substring(0, 100) || null,
+        city: geoData.city?.substring(0, 100) || null,
       },
     })
 

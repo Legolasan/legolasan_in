@@ -29,7 +29,7 @@ export interface Education {
 export interface Skill {
   name: string;
   level: number; // 0-100
-  category: 'Languages' | 'Frameworks' | 'Tools' | 'Other' | 'Support Engineering' | 'Support Manager' | 'Product Manager';
+  category: 'Cloud & Data' | 'AI & Automation' | 'Operations' | 'Leadership';
 }
 
 export interface BlogPost {
@@ -49,6 +49,17 @@ export interface Tool {
   icon: string;
   link: string;
   technologies?: string[];
+}
+
+export interface LearningModule {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  link: string;
+  topics: string[];
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
 }
 
 export const projects: Project[] = [
@@ -89,86 +100,67 @@ export const projects: Project[] = [
 export const experiences: Experience[] = [
   {
     id: '1',
-    company: 'Hevo Data Pvt. Ltd',
-    position: 'Product Manager',
-    duration: '2024 - Present',
+    company: 'Hevo Technologies Pvt Ltd',
+    position: 'Technical Operations Manager',
+    duration: '2022 - Present',
     location: 'Bengaluru, Karnataka',
     description: [
-      'Defined and shipped improvements across Salesforce, HubSpot, NetSuite, Facebook Ads, Qualtrics, PostgreSQL, MySQL, MongoDB (Oplog/ChangeStreams), and SQL Server connectors. ',
-      'Drove initiatives to reduce ingestion failures, optimize historical load performance, and stabilize CDC pipelines handling millions of events',
-      'Designed improvements for error classification, async processing queues, offset management, and failure-recovery workflows across connectors.',
-      'Led feature development for secure destinations, including private key–based authentication, and automated test-connection validation.',
-      'Analyzed customer setup sessions to identify friction points in pipeline creation. Delivered actionable insights to improve onboarding flows, reduce abandonment, and increase successful destination configuration rates.'
+      'Led a 15+ member L1/L2 technical support team delivering 24x7 support for 2000+ global customers.',
+      'Improved First Response Time by 35%, MTTR by 28%, and maintained >95% SLA adherence.',
+      'Managed P1/P0 production escalations involving data pipelines, PostgreSQL, MySQL, Snowflake, and API integrations.',
+      'Built structured incident review and RCA framework, reducing repeat issue categories by 22%.',
+      'Drove AI-assisted ticket classification and knowledge base improvements, reducing repetitive queries by ~18%.'
     ],
   },
   {
     id: '2',
-    company: 'Hevo Data Pvt. Ltd',
-    position: 'Product Support Manager',
-    duration: '2022 - 2024',
-    location: 'Bengaluru, Karnataka',
-    description: [
-      'Improved the first response SLA coverage from 80% to >95%.',
-'Improve the resolution SLA coverage from 55% to >75%.',
-'Kept the fewer replies coverage above 80%.',
-'Maintaining the CSAT percentage above 90% for email ticketing system and 95 and above for the Chat systems.',
-'Kept the referral ratio under 30% for better balance between engineering and support teams.'
-    ],
-  },
-  {
-    id: '3',
-    company: 'Hevo Data Pvt. Ltd',
+    company: 'Hevo Technologies Pvt Ltd',
     position: 'Product Support Engineer',
     duration: '2019 - 2022',
     location: 'Bengaluru, Karnataka',
     description: [
-      'Handling incoming queries/Issues for the Hevo ETL platform.',
-'Solved >70% cases under 24 hours.',
-'Kept the referral to engineering below 30%. Keep iterating over the referred Jiras to make sure, we have KB OR Troubleshooting article created.',
-'Kept improving the knowledge space by contributing more than 5 KBs a week.',
-'Maintained the CSAT more than 90% overall in my tenure.'
+      'Provided L2 technical support for cloud-based ELT platform, troubleshooting data pipelines, REST APIs, and databases.',
+      'Resolved complex production incidents involving authentication failures, schema drift, CDC lag, and API rate limits with >92% SLA.',
+      'Led customer-facing debugging sessions with enterprise clients, analyzing logs and restoring critical data flows.',
+      'Partnered with Engineering to reproduce defects, provide RCA documentation, and influence platform reliability improvements.',
+      'Reduced recurring ticket volume by identifying failure patterns and contributing to automation scripts.'
     ],
   },
   {
-    id: '4',
-    company: 'Sprinklr Inc.',
+    id: '3',
+    company: 'Sprinklr',
     position: 'Product Support Engineer',
     duration: '2018 - 2019',
     location: 'Bengaluru, Karnataka',
     description: [
-    'Provided technical support for the Sprinklr Premium Ads Serving platform, troubleshooting and resolving complex ad delivery and reporting issues for global clients.',
-    'Acted as a point of contact between clients and engineering teams, facilitating timely resolution of escalated technical problems.',
-    'Monitored, analyzed, and diagnosed ads platform incidents, ensuring high availability and minimal downtime for mission-critical campaigns.',
-    'Created and maintained troubleshooting documentation and internal knowledge base articles to improve support team efficiency.',
-    'Collaborated cross-functionally with product and development teams to provide feedback and advocate for customer-centric feature improvements.',
+      'Supported Sprinklr Ads platform for enterprise customers like McDonald\'s, Nike, and Adidas.',
+      'Conducted root cause analyses on recurring issues, implementing preventive measures.',
+      'Managed critical product escalations, coordinating efforts across teams for prompt resolutions.',
+      'Contributed to new product development by providing valuable user feedback from support perspective.',
+    ],
+  },
+  {
+    id: '4',
+    company: 'Yahoo! Inc.',
+    position: 'Technical Solutions Engineer',
+    duration: '2015 - 2018',
+    location: 'Bengaluru, Karnataka',
+    description: [
+      'Supported Yahoo\'s DSP and Premium Ad Serving systems, resolving campaign creation and delivery issues.',
+      'Investigated ad serving failures including tracking pixel misfires, targeting mismatches, and budget pacing issues.',
+      'Partnered with Product and Engineering to escalate platform defects and improve operational workflows.',
     ],
   },
   {
     id: '5',
-    company: 'Yahoo Inc',
-    position: 'Product Support Engineer',
-    duration: '2015 - 2018',
-    location: 'Bengaluru, Karnataka',
-    description: [
-    'Provided advanced technical support for Yahoo Ads platforms, handling queries and issues from global clients.',
-    'Diagnosed and resolved ad delivery, targeting, and reporting issues, collaborating closely with engineering and product teams for complex escalations.',
-    'Maintained a resolution SLA of over 85% for assigned support tickets, ensuring timely and effective solutions.',
-    'Documented troubleshooting steps and contributed to the creation and upkeep of internal knowledge base articles.',
-    'Consistently received positive CSAT feedback by demonstrating effective communication and empathy with clients.',
-    ],
-  },
-  {
-    id: '6',
     company: 'Minacs',
     position: 'Associate Analyst',
-    duration: '2014 - 2014',
+    duration: '2014 - 2015',
     location: 'Bengaluru, Karnataka',
     description: [
-    'Handled customer queries and provided technical support via email for Apple iTunes services.',
-    'Assisted users with account issues, purchase problems, subscription management, and troubleshooting playback errors.',
-    'Collaborated with cross-functional teams to escalate and resolve complex cases efficiently.',
-    'Maintained high standards of customer satisfaction by providing clear communication and timely responses.',
-    'Documented recurring issues and contributed to internal knowledge base to streamline support processes.',
+      'Handled high-volume email support for iPhone and iTunes products, consistently meeting SLAs.',
+      'Diagnosed account, billing, sync, and software-related issues; routed complex cases to specialized teams.',
+      'Improved turnaround time by documenting structured SOPs and knowledge articles.',
     ],
   },
 ];
@@ -185,35 +177,27 @@ export const education: Education[] = [
 ];
 
 export const skills: Skill[] = [
-  // Languages
-  { name: 'Python', level: 50, category: 'Languages' },
-  { name: 'SQL', level: 50, category: 'Languages' },
-  // Frameworks
-  { name: 'Flask', level: 50, category: 'Frameworks' },
-  { name: 'FastAPI', level: 50, category: 'Frameworks' },
-  // Tools
-  { name: 'Git', level: 50, category: 'Tools' },
-  { name: 'Docker', level: 50, category: 'Tools' },
-  { name: 'AWS', level: 50, category: 'Tools' },
-  { name: 'CI/CD', level: 50, category: 'Tools' },
-  // Support Engineering
-  { name: 'Customer Satisfaction', level: 100, category: 'Support Engineering' },
-  { name: 'Customer Advocacy', level: 100, category: 'Support Engineering' },
-  { name: 'Time Management', level: 100, category: 'Support Engineering' },
-  { name: 'Escalation Handling', level: 100, category: 'Support Engineering' },
-  // Support Manager
-  { name: 'Customer Empathy', level: 100, category: 'Support Manager' },
-  { name: 'Team Performance Management', level: 100, category: 'Support Manager' },
-  { name: 'Stakeholder Management', level: 100, category: 'Support Manager' },
-  { name: 'Feedback Loop', level: 100, category: 'Support Manager' },
-  { name: 'Coaching & Mentorship', level: 100, category: 'Support Manager' },
-  // Product Manager
-  { name: 'Strategic Thinking', level: 100, category: 'Product Manager' },
-  { name: 'Data Driven Decisions', level: 100, category: 'Product Manager' },
-  { name: 'Communication & Leadership', level: 100, category: 'Product Manager' },
-  { name: 'Prioritization', level: 100, category: 'Product Manager' },
-  { name: 'Adaptability', level: 100, category: 'Product Manager' },
-  { name: 'Execution', level: 100, category: 'Product Manager' },
+  // Cloud & Data
+  { name: 'PostgreSQL / MySQL', level: 90, category: 'Cloud & Data' },
+  { name: 'Snowflake / Redshift', level: 85, category: 'Cloud & Data' },
+  { name: 'AWS / GCP / Azure', level: 80, category: 'Cloud & Data' },
+  { name: 'Data Pipelines & CDC', level: 90, category: 'Cloud & Data' },
+  { name: 'REST APIs & Webhooks', level: 85, category: 'Cloud & Data' },
+  // AI & Automation
+  { name: 'LLM Integration (OpenAI, Claude)', level: 85, category: 'AI & Automation' },
+  { name: 'RAG & Vector Databases', level: 80, category: 'AI & Automation' },
+  { name: 'Python CLI Tools', level: 85, category: 'AI & Automation' },
+  { name: 'AI-Powered Support Tools', level: 90, category: 'AI & Automation' },
+  // Operations
+  { name: 'P0/P1 Incident Management', level: 95, category: 'Operations' },
+  { name: 'SLA & MTTR Optimization', level: 95, category: 'Operations' },
+  { name: 'Enterprise Escalations', level: 95, category: 'Operations' },
+  { name: 'RCA & Production Debugging', level: 90, category: 'Operations' },
+  // Leadership
+  { name: 'Cross-functional Execution', level: 95, category: 'Leadership' },
+  { name: 'Team Leadership (15+ members)', level: 90, category: 'Leadership' },
+  { name: 'Stakeholder Alignment', level: 90, category: 'Leadership' },
+  { name: 'Product Roadmap Ownership', level: 85, category: 'Leadership' },
 ];
 
 export const blogPosts: BlogPost[] = [
@@ -246,6 +230,15 @@ export const blogPosts: BlogPost[] = [
 export const tools: Tool[] = [
   {
     id: '1',
+    name: 'Hevo Assistant',
+    description: 'Chat-to-action CLI for managing Hevo Data pipelines using natural language. Ask questions, check status, pause/resume pipelines, and more through conversation. RAG-powered with multiple LLM providers.',
+    category: 'AI & DevOps',
+    icon: '🤖',
+    link: 'https://github.com/Legolasan/hevo-app',
+    technologies: ['Python', 'OpenAI', 'Pinecone', 'RAG', 'CLI'],
+  },
+  {
+    id: '2',
     name: 'Customer Session Analyser',
     description: 'Track and analyze customer interactions with products to derive actionable insights. Perfect for support teams and product managers.',
     category: 'Analytics',
@@ -254,7 +247,7 @@ export const tools: Tool[] = [
     technologies: ['Python', 'Flask', 'PostgreSQL'],
   },
   {
-    id: '2',
+    id: '3',
     name: 'Snowflake Credit Monitor',
     description: 'Streamlit dashboard to monitor and analyze Snowflake credit consumption with real-time tracking. Identify costly queries, track warehouse efficiency, and optimize cloud database costs.',
     category: 'Analytics',
@@ -263,7 +256,7 @@ export const tools: Tool[] = [
     technologies: ['Python', 'Streamlit', 'Snowflake'],
   },
   {
-    id: '3',
+    id: '4',
     name: 'Zendesk Test Case Generator',
     description: 'Automatically generate test cases from Zendesk tickets for regression and functional testing. Streamlines QA workflows.',
     category: 'Testing & QA',
@@ -272,7 +265,7 @@ export const tools: Tool[] = [
     technologies: ['Python', 'Zendesk API'],
   },
   {
-    id: '4',
+    id: '5',
     name: 'Snowflake Key Rotation CLI',
     description: 'Rotate Snowflake key-pairs directly from your terminal. Published as a PyPI package for easy installation and use.',
     category: 'Security & DevOps',
@@ -281,7 +274,7 @@ export const tools: Tool[] = [
     technologies: ['Python', 'Snowflake', 'PyPI'],
   },
   {
-    id: '5',
+    id: '6',
     name: 'Weekly Reporting Tracker',
     description: 'Personal productivity tool to track work items week over week. Stay organized and never miss important tasks.',
     category: 'Productivity',
@@ -289,19 +282,55 @@ export const tools: Tool[] = [
     link: 'https://github.com/Legolasan/weekly_reporting',
     technologies: ['Python', 'Flask', 'PostgreSQL'],
   },
+  {
+    id: '7',
+    name: 'Connector Research Platform',
+    description: 'Enterprise-ready system for generating comprehensive research documents about data integration connectors. Combines multi-source knowledge retrieval with AI-powered analysis and built-in hallucination prevention.',
+    category: 'AI & Documentation',
+    icon: '🔬',
+    link: 'https://github.com/Legolasan/connector_research',
+    technologies: ['Python', 'OpenAI', 'CLI'],
+  },
+  {
+    id: '8',
+    name: 'Snowflake Query Monitor',
+    description: 'Streamlit dashboard for real-time Snowflake query monitoring. Track query performance, identify bottlenecks, detect long-running queries, and analyze warehouse credit consumption.',
+    category: 'Analytics',
+    icon: '📈',
+    link: 'https://github.com/Legolasan/sf_monitor',
+    technologies: ['Python', 'Streamlit', 'Snowflake'],
+  },
+  {
+    id: '9',
+    name: 'MySQL Test Toolkit',
+    description: 'Docker-based toolkit for testing ETL/CDC replication scenarios. Simulate binlog corruption, connection issues, GTID gaps, and network problems in a controlled environment.',
+    category: 'Testing & QA',
+    icon: '🐳',
+    link: 'https://github.com/Legolasan/mysql-test-toolkit',
+    technologies: ['Docker', 'MySQL', 'Shell'],
+  },
+  {
+    id: '10',
+    name: 'Multi-Agent Coding Assistant',
+    description: 'AI-powered CLI that indexes codebases and deploys specialized agents for research, implementation, testing, code review, and PRD generation. Features RAG-based semantic search and customizable personas.',
+    category: 'AI & Development',
+    icon: '🤖',
+    link: 'https://github.com/Legolasan/codebase_ai',
+    technologies: ['Python', 'LangGraph', 'ChromaDB', 'Claude/GPT-4'],
+  },
 ];
 
 export const personalInfo = {
   name: 'Arun Sundararajan',
-  title: 'Product Manager',
-  email: 'arunsunderraj@outlook.com',
+  title: 'Technical Operations Manager',
+  email: 'arunsunderraj17@gmail.com',
   phone: '+91 8197882503',
   location: 'Bengaluru, Karnataka',
-  bio: "I'm a Product Manager with a strong technical background and over ten years of experience working on data platforms. I enjoy understanding how systems break in the real world and turning those lessons into better product decisions.",
+  bio: "Cloud SaaS leader with 13+ years spanning technical support, operations leadership, and product management. I enjoy understanding how systems break in the real world and turning those lessons into platform reliability improvements.",
   bioExtended: [
-    "At Hevo, I work on improving connector reliability, authentication flows, and onboarding across modern data stacks. My work touches platforms like Snowflake, Salesforce, HubSpot, NetSuite, and PostgreSQL.",
-    "I like collaborating closely with engineers to shape ideas into simple, maintainable solutions. I'm naturally analytical and spend a lot of time thinking about edge cases and long-term scalability.",
-    "My background in support helps me stay grounded in real user problems. I care about building products that are reliable, understandable, and easy to trust."
+    "At Hevo, I own the roadmap for connector reliability and platform hardening across 20+ integrations, driving cross-functional execution with Engineering, Support, and SRE teams.",
+    "I've progressed from hands-on troubleshooting of distributed data pipelines and databases to leading global support teams. My work spans PostgreSQL, MySQL, Snowflake, Redshift, and cloud platforms like AWS, GCP, and Azure.",
+    "Strong background in incident management, enterprise escalations, and translating customer pain points into scalable engineering improvements."
   ],
   socialLinks: {
     github: 'https://github.com/legolasan',
@@ -309,4 +338,17 @@ export const personalInfo = {
     email: 'mailto:arunsunderraj@outlook.com',
   },
 };
+
+export const learningModules: LearningModule[] = [
+  {
+    id: '1',
+    name: 'MySQL Learning',
+    description: 'Interactive visual learning platform for mastering MySQL concepts. Learn SQL through hands-on experimentation with real-time query visualization, step-by-step explanations, and animated demonstrations.',
+    category: 'Database',
+    icon: '🐬',
+    link: '/learn/mysql/',
+    topics: ['SQL Basics', 'B-Tree Indexes', 'Joins', 'Query Optimization', 'Transactions', 'Window Functions', 'InnoDB Internals'],
+    difficulty: 'All Levels',
+  },
+];
 

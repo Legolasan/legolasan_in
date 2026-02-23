@@ -4,6 +4,7 @@ import { personalInfo, experiences, skills, projects, education } from '@/lib/da
 import { prisma } from '@/lib/db'
 import { UAParser } from 'ua-parser-js'
 import { rateLimiters, getClientIP } from '@/lib/rateLimit'
+import { getGeoFromIP } from '@/lib/geoLookup'
 
 // Input validation constants
 const MAX_MESSAGE_LENGTH = 1000
@@ -105,7 +106,7 @@ async function getOrCreateSession(
     let device = 'unknown'
     let browser = 'unknown'
     let os = 'unknown'
-    
+
     if (userAgent) {
       const parser = new UAParser(userAgent)
       const result = parser.getResult()
@@ -113,6 +114,9 @@ async function getOrCreateSession(
       browser = result.browser.name || 'unknown'
       os = result.os.name || 'unknown'
     }
+
+    // Get geo data from IP
+    const geoData = await getGeoFromIP(ip)
 
     // Create new session
     const session = await prisma.chatSession.create({
@@ -123,8 +127,8 @@ async function getOrCreateSession(
         device: device.substring(0, 50),
         browser: browser.substring(0, 100),
         os: os.substring(0, 100),
-        country: null,
-        city: null,
+        country: geoData.country?.substring(0, 100) || null,
+        city: geoData.city?.substring(0, 100) || null,
       },
     })
 

@@ -70,8 +70,8 @@ export default function About() {
                   <div className="text-gray-600 dark:text-gray-400">Years Experience</div>
                 </div>
                 <div className="p-4 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/30 dark:to-accent-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">50+</div>
-                  <div className="text-gray-600 dark:text-gray-400">Connectors Shipped</div>
+                  <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">5+</div>
+                  <div className="text-gray-600 dark:text-gray-400">Connectors Improved</div>
                 </div>
                 <div className="p-4 bg-gradient-to-br from-secondary-50 to-secondary-100 dark:from-secondary-900/30 dark:to-secondary-800/30 rounded-lg">
                   <div className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">95%+</div>

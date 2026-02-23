@@ -9,14 +9,13 @@ import ResumeModal from './ResumeModal'
 const navItems = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/#about' },
-  { name: 'Projects', href: '/#projects' },
   { name: 'Skills', href: '/#skills' },
   { name: 'Experience', href: '/#experience' },
   { name: 'Education', href: '/#education' },
-  { name: 'Contact', href: '/#contact' },
-  { name: 'Blog', href: '/blogs' },
   { name: 'Tools', href: '/tools' },
-  // { name: 'Services', href: '/services' }, // Hidden for now
+  { name: 'Learn', href: '/learn' },
+  { name: 'Blog', href: '/blogs' },
+  { name: 'Contact', href: '/#contact' },
 ]
 
 export default function Header() {

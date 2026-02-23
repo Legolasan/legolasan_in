@@ -4,23 +4,18 @@ import { motion } from 'framer-motion'
 import { skills } from '@/lib/data'
 
 const categoryColors: Record<string, string> = {
-  Languages: 'from-primary-500 to-primary-600',
-  Frameworks: 'from-accent-500 to-accent-600',
-  Tools: 'from-secondary-500 to-secondary-600',
-  Other: 'from-gray-500 to-gray-600',
-  'Support Engineering': 'from-emerald-500 to-emerald-600',
-  'Support Manager': 'from-blue-500 to-blue-600',
-  'Product Manager': 'from-purple-500 to-purple-600',
+  'Cloud & Data': 'from-primary-500 to-primary-600',
+  'AI & Automation': 'from-accent-500 to-accent-600',
+  Operations: 'from-emerald-500 to-emerald-600',
+  Leadership: 'from-purple-500 to-purple-600',
 }
 
 export default function Skills() {
   const skillsByCategory = {
-    'Product Manager': skills.filter((s) => s.category === 'Product Manager'),
-    'Support Manager': skills.filter((s) => s.category === 'Support Manager'),
-    'Support Engineering': skills.filter((s) => s.category === 'Support Engineering'),
-    Languages: skills.filter((s) => s.category === 'Languages'),
-    Frameworks: skills.filter((s) => s.category === 'Frameworks'),
-    Tools: skills.filter((s) => s.category === 'Tools'),
+    Operations: skills.filter((s) => s.category === 'Operations'),
+    Leadership: skills.filter((s) => s.category === 'Leadership'),
+    'Cloud & Data': skills.filter((s) => s.category === 'Cloud & Data'),
+    'AI & Automation': skills.filter((s) => s.category === 'AI & Automation'),
   }
 
   return (
