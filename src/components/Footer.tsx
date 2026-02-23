@@ -22,7 +22,7 @@ export default function Footer() {
               Portfolio
             </h3>
             <p className="text-gray-400">
-              Building amazing web experiences with modern technologies.
+              Building amazing web experiences with modern technologies. Deployed via GitHub Actions.
             </p>
           </div>
 
