@@ -167,17 +167,26 @@ Both apps deploy from GitHub repositories:
 | Portfolio | `Legolasan/legolasan_in` | `/var/www/portfolio` |
 | MySQL Learning | `Legolasan/sql_learn` | `/home/ubuntu/apps/sql_learn` |
 
-### Auto-Deploy via GitHub Actions
+### Auto-Deploy via Cron (Pull-based)
 
-**On every `git push` to main:**
-1. GitHub Actions triggers (`.github/workflows/deploy.yml`)
-2. SSH into VPS
-3. `git pull` → `npm ci` → `prisma migrate` → `npm run build` → `pm2 restart`
+VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 
-**GitHub Secrets Required** (Settings → Secrets → Actions):
-- `VPS_HOST`: `195.35.22.87`
-- `VPS_USER`: `ubuntu`
-- `VPS_SSH_KEY`: SSH private key contents
+**Cron jobs on VPS:**
+```
+*/2 * * * * /home/ubuntu/auto-deploy.sh              # Portfolio
+*/2 * * * * /home/ubuntu/auto-deploy-mysql-learn.sh  # MySQL Learning
+```
+
+**Logs:**
+- Portfolio: `/home/ubuntu/deploy.log`
+- MySQL Learning: `/home/ubuntu/deploy-mysql.log`
+
+**How it works:**
+1. `git push` to GitHub
+2. VPS detects new commits within 2 minutes
+3. Auto-pulls and rebuilds
+
+**Note:** GitHub Actions workflow exists but VPS provider blocks incoming SSH from GitHub IPs. Cron-based pull is the workaround.
 
 ### VPS Infrastructure
 
