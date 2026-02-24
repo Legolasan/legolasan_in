@@ -150,6 +150,46 @@ export async function GET(request: NextRequest) {
       take: 10,
     })
 
+    // Traffic sources (UTM source)
+    const trafficSources = await prisma.pageView.groupBy({
+      by: ['utmSource'],
+      where: {
+        createdAt: { gte: startDate },
+        utmSource: { not: null },
+      },
+      _count: {
+        utmSource: true,
+      },
+      orderBy: {
+        _count: {
+          utmSource: 'desc',
+        },
+      },
+      take: 10,
+    })
+
+    // Campaign performance (source + medium + campaign combo)
+    const campaignPerformance = await prisma.$queryRaw<
+      Array<{
+        utm_source: string
+        utm_medium: string | null
+        utm_campaign: string | null
+        count: bigint
+      }>
+    >`
+      SELECT
+        "utmSource" as utm_source,
+        "utmMedium" as utm_medium,
+        "utmCampaign" as utm_campaign,
+        COUNT(*) as count
+      FROM page_views
+      WHERE "createdAt" >= ${startDate}
+        AND "utmSource" IS NOT NULL
+      GROUP BY "utmSource", "utmMedium", "utmCampaign"
+      ORDER BY count DESC
+      LIMIT 20
+    `
+
     return NextResponse.json({
       totalViews,
       uniqueVisitors: uniqueVisitors.length,
@@ -181,6 +221,16 @@ export async function GET(request: NextRequest) {
       topCountries: topCountries.map((c) => ({
         country: c.country,
         count: c._count.country,
+      })),
+      trafficSources: trafficSources.map((s) => ({
+        source: s.utmSource,
+        count: s._count.utmSource,
+      })),
+      campaignPerformance: campaignPerformance.map((c) => ({
+        source: c.utm_source,
+        medium: c.utm_medium,
+        campaign: c.utm_campaign,
+        count: Number(c.count),
       })),
     })
   } catch (error) {

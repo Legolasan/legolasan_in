@@ -166,9 +166,16 @@ model PageView {
   sessionId String?  @db.VarChar(100)
   createdAt DateTime @default(now())
 
+  // UTM tracking fields for referral attribution
+  utmSource   String?  @db.VarChar(100)
+  utmMedium   String?  @db.VarChar(100)
+  utmCampaign String?  @db.VarChar(200)
+  utmContent  String?  @db.VarChar(200)
+
   @@index([pagePath])
   @@index([createdAt])
   @@index([sessionId])
+  @@index([utmSource])
   @@map("page_views")
 }
 

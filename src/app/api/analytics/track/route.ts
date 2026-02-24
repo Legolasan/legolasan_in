@@ -4,6 +4,14 @@ import { UAParser } from 'ua-parser-js'
 import { rateLimiters, getClientIP } from '@/lib/rateLimit'
 import { getGeoFromIP } from '@/lib/geoLookup'
 
+// Sanitize UTM parameter - only allow alphanumeric, underscore, hyphen
+const sanitizeUTM = (value: unknown, maxLength: number): string | null => {
+  if (typeof value !== 'string' || !value) return null
+  // Allow common UTM characters: alphanumeric, underscore, hyphen, period
+  const sanitized = value.replace(/[^a-zA-Z0-9_\-\.]/g, '').substring(0, maxLength)
+  return sanitized || null
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
@@ -15,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { pagePath, referrer, sessionId } = body
+    const { pagePath, referrer, sessionId, utmSource, utmMedium, utmCampaign, utmContent } = body
 
     // Input validation
     if (typeof pagePath !== 'string' || pagePath.length > 500) {
@@ -41,6 +49,11 @@ export async function POST(request: NextRequest) {
         sessionId: typeof sessionId === 'string' ? sessionId.substring(0, 100) : null,
         country: geoData.country?.substring(0, 100) || null,
         city: geoData.city?.substring(0, 100) || null,
+        // UTM tracking fields
+        utmSource: sanitizeUTM(utmSource, 100),
+        utmMedium: sanitizeUTM(utmMedium, 100),
+        utmCampaign: sanitizeUTM(utmCampaign, 200),
+        utmContent: sanitizeUTM(utmContent, 200),
       },
     })
 

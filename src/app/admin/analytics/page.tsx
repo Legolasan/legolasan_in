@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaEye, FaUsers, FaGlobe, FaChartLine, FaDesktop, FaMobile, FaTablet, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaEye, FaUsers, FaGlobe, FaChartLine, FaDesktop, FaMobile, FaTablet, FaMapMarkerAlt, FaShareAlt } from 'react-icons/fa'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for the map component (avoid SSR issues)
@@ -25,6 +25,13 @@ interface AnalyticsData {
   topReferrers: Array<{ referrer: string; count: number }>
   visitorLocations: Array<{ country: string; city: string | null; count: number }>
   topCountries: Array<{ country: string; count: number }>
+  trafficSources: Array<{ source: string; count: number }>
+  campaignPerformance: Array<{
+    source: string
+    medium: string | null
+    campaign: string | null
+    count: number
+  }>
 }
 
 export default function AnalyticsDashboard() {
@@ -202,6 +209,91 @@ export default function AnalyticsDashboard() {
           </div>
         )}
       </motion.div>
+
+      {/* Traffic Sources Section */}
+      {(data.trafficSources?.length > 0 || data.campaignPerformance?.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="bg-white rounded-xl shadow-lg p-6 mb-8"
+        >
+          <div className="flex items-center gap-2 mb-6">
+            <FaShareAlt className="text-purple-600 w-5 h-5" />
+            <h3 className="text-xl font-bold text-gray-800">Traffic Sources (UTM)</h3>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Traffic Sources Bar Chart */}
+            {data.trafficSources?.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-gray-600 mb-4">Sources</h4>
+                <div className="space-y-3">
+                  {data.trafficSources.map((source) => {
+                    const maxCount = data.trafficSources[0]?.count || 1
+                    const percentage = Math.round((source.count / maxCount) * 100)
+                    return (
+                      <div key={source.source}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-gray-700 font-medium capitalize">{source.source}</span>
+                          <span className="text-gray-500 text-sm">{source.count} views</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className="bg-purple-500 h-2.5 rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Campaign Performance Table */}
+            {data.campaignPerformance?.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-gray-600 mb-4">Campaign Performance</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="pb-2">Source</th>
+                        <th className="pb-2">Medium</th>
+                        <th className="pb-2">Campaign</th>
+                        <th className="pb-2 text-right">Views</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.campaignPerformance.slice(0, 10).map((campaign, index) => (
+                        <tr key={index} className="border-b border-gray-100">
+                          <td className="py-2 text-gray-800 capitalize">{campaign.source}</td>
+                          <td className="py-2 text-gray-600">{campaign.medium || '-'}</td>
+                          <td className="py-2 text-gray-600 truncate max-w-[150px]">
+                            {campaign.campaign || '-'}
+                          </td>
+                          <td className="py-2 text-right font-semibold text-gray-800">
+                            {campaign.count}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* UTM Help Text */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-500">
+              <strong>Tip:</strong> Add UTM parameters to track traffic sources. Example:{' '}
+              <code className="bg-gray-200 px-1 rounded">legolasan.in?utm_source=linkedin&utm_medium=social</code>
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Top Pages */}
