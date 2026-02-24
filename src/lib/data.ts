@@ -318,6 +318,24 @@ export const tools: Tool[] = [
     link: 'https://github.com/Legolasan/codebase_ai',
     technologies: ['Python', 'LangGraph', 'ChromaDB', 'Claude/GPT-4'],
   },
+  {
+    id: '11',
+    name: 'SQL Learn',
+    description: 'Interactive visual learning platform for mastering MySQL concepts. Features real-time query visualization, animated B-Tree demos, InnoDB crash recovery simulations, and step-by-step query execution explanations.',
+    category: 'Learning & Education',
+    icon: '🎓',
+    link: 'https://github.com/Legolasan/sql_learn',
+    technologies: ['Python', 'Flask', 'MySQL'],
+  },
+  {
+    id: '12',
+    name: 'Unix & Networking Lab',
+    description: 'Interactive learning platform for Unix command-line and networking concepts. Practice real commands in a safe Docker sandbox environment with structured lessons from beginner to advanced.',
+    category: 'Learning & Education',
+    icon: '🐧',
+    link: 'https://github.com/Legolasan/unix_networking',
+    technologies: ['Python', 'Flask', 'Docker'],
+  },
 ];
 
 export const personalInfo = {

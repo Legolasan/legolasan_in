@@ -17,9 +17,9 @@ npm run lint             # ESLint
 npm run prisma:migrate   # Run migrations (dev mode)
 npm run prisma:studio    # Open Prisma UI at :5555
 
-# Deployment (auto via GitHub Actions on push)
-git push                 # Auto-deploys to VPS via GitHub Actions
-./deploy/deploy.sh       # Manual fallback if Actions fails
+# Deployment (auto via cron pull every 2 min)
+git push                 # VPS auto-pulls and rebuilds within 2 min
+./deploy/deploy.sh       # Manual deploy for immediate updates
 ```
 
 ## Architecture
@@ -83,24 +83,10 @@ PM2 process: `mysql-learn` → Gunicorn on port 5001 → Nginx reverse proxy at 
 
 ### URL Prefix Handling
 
-Flask apps served under a subpath need proper URL generation. Requirements:
-1. Nginx must send `X-Forwarded-Prefix` header (not `X-Script-Name`)
-2. WSGI wrapper uses `ProxyFix(app.wsgi_app, x_prefix=1)` to read the header
+Flask apps served under a subpath need proper URL generation:
+1. Nginx sends `X-Forwarded-Prefix` header
+2. WSGI wrapper uses `ProxyFix(app.wsgi_app, x_prefix=1)`
 3. Templates must use `url_for()` instead of hardcoded URLs
-
-**Pending:** Push `url_for()` template fixes to the sql_learn repo so they persist:
-- `app/templates/base.html`: Change `href="/"` → `href="{{ url_for('main.index') }}"`
-- `app/templates/base.html` & `index.html`: Change `href="/concept/{{ concept.name }}"` → `href="{{ url_for('concepts.show_concept', concept_name=concept.name) }}"`
-
-**Temporary workaround** (if fixes aren't in repo yet):
-```bash
-ssh ubuntu@195.35.22.87 << 'EOF'
-cd /home/ubuntu/apps/sql_learn/app/templates
-sed -i 's|href="/"|href="{{ url_for('\''main.index'\'') }}"|g' base.html
-sed -i 's|href="/concept/{{ concept.name }}"|href="{{ url_for('\''concepts.show_concept'\'', concept_name=concept.name) }}"|g' base.html index.html
-pm2 restart mysql-learn
-EOF
-```
 
 ## Key Patterns
 
@@ -132,7 +118,7 @@ Core models in `prisma/schema.prisma`:
 - `User` - OAuth users with role ("admin" or "user")
 - `BlogPost` - Blog entries with categories, tags, comments (status: "draft" | "published")
 - `ChatSession`/`ChatMessage` - AI chatbot conversation history
-- `PageView` - Custom analytics tracking
+- `PageView` - Custom analytics tracking (includes UTM params: `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`)
 - `ResumeDownload` - Resume request tracking with email/domain
 
 Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`).
@@ -164,9 +150,9 @@ Required in `.env`:
 Both apps deploy from GitHub repositories:
 
 ```
-┌─────────────┐     git push      ┌─────────────┐   GitHub Actions    ┌─────────────┐
-│   Local     │  ──────────────►  │   GitHub    │  ───────────────►   │    VPS      │
-│   Machine   │                   │   Repos     │    (auto-deploy)    │   Server    │
+┌─────────────┐     git push      ┌─────────────┐    cron pull        ┌─────────────┐
+│   Local     │  ──────────────►  │   GitHub    │  ◄───────────────   │    VPS      │
+│   Machine   │                   │   Repos     │    (every 2 min)    │   Server    │
 └─────────────┘                   └─────────────┘                     └─────────────┘
                                         │
                                         ├── legolasan_in (portfolio)
@@ -206,14 +192,9 @@ VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 - **Process Manager:** PM2 (Node.js + Python apps)
 - **Web Server:** Nginx (reverse proxy + SSL via Let's Encrypt)
 
-### Deployment Scripts (Manual Fallback)
+### Manual Deployment Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `deploy/deploy.sh` | Manual deploy - runs `git pull` + build on VPS |
-| `deploy/deploy-learn-apps.sh` | Flask learning apps deployment |
-
-Use manual scripts if GitHub Actions fails:
+For immediate deployment (bypasses 2-minute cron wait):
 ```bash
 ./deploy/deploy.sh              # Portfolio
 ./deploy/deploy-learn-apps.sh   # MySQL Learning
@@ -234,29 +215,3 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 
-### Deployment Workflow
-
-1. Make changes locally
-2. `git add . && git commit -m "message"`
-3. `git push` → Auto-deploys via GitHub Actions
-4. Check https://github.com/Legolasan/legolasan_in/actions for status
-
-## Pending Updates (Draft)
-
-**Technical Operations Manager - Revised Bullets (not yet implemented):**
-
-1. Collaborated with Technical Account Managers on strategic customer calls, delivering technical insights on data pipeline architecture and integrations that retained 3 at-risk enterprise accounts and drove upsell opportunities.
-
-2. Developed AI-powered automation using Python and LLMs (Claude, ChatGPT) for intelligent ticket classification and self-service knowledge base enhancements, significantly reducing manual triage and accelerating first response times.
-
-3. Drove >90% CSAT across 24/7 global operations by implementing structured feedback loops, proactive escalation protocols, and continuous service quality monitoring.
-
-4. Spearheaded cross-functional resolution of complex production incidents involving Java applications, SQL optimization, REST API debugging, and cloud storage systems (S3, GCS), utilizing Grafana and Corologix for real-time observability.
-
-5. Orchestrated P1/P0 incident response across relational (PostgreSQL, MySQL) and non-relational database systems, streamlining workflows through Jira, Zendesk, and HubSpot.
-
-6. Scaled support organization from 2 to 15+ engineers, building mentorship programs, coaching frameworks, and structured performance management including appraisals and PIPs.
-
-7. Cultivated growth mindset culture through regular 1:1 coaching, continuous feedback loops, and cross-functional partnerships with Engineering, Product, and SRE teams.
-
-*To apply: Replace the description array in the first experience entry in `src/lib/data.ts` with these bullets.*
