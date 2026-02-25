@@ -87,12 +87,21 @@ PM2 processes:
 - `mysql-learn` → port 5001 → `/learn/mysql/`
 - `unix-learn` → port 5003 → `/learn/unix/`
 
+### Generated Config Files (Not in Repo)
+
+The deploy scripts create these files on VPS - they persist through auto-deploys:
+- `wsgi.py` - WSGI wrapper with ProxyFix for URL prefix handling
+- `gunicorn_config.py` - Gunicorn bind address and worker config
+- `ecosystem.config.js` - PM2 process configuration
+
 ### URL Prefix Handling
 
 Flask apps served under a subpath need proper URL generation:
 1. Nginx sends `X-Forwarded-Prefix` header
 2. WSGI wrapper uses `ProxyFix(app.wsgi_app, x_prefix=1)`
 3. Templates must use `url_for()` instead of hardcoded URLs
+
+**Important:** If templates use hardcoded URLs like `href="/concepts"`, they will 404 when served under `/learn/unix/`. Always use `url_for('blueprint.route_name')` in Flask templates.
 
 ## Key Patterns
 
@@ -162,7 +171,8 @@ Both apps deploy from GitHub repositories:
 └─────────────┘                   └─────────────┘                     └─────────────┘
                                         │
                                         ├── legolasan_in (portfolio)
-                                        └── sql_learn (mysql learning)
+                                        ├── sql_learn (mysql learning)
+                                        └── unix_networking (unix learning)
 ```
 
 | App | GitHub Repo | VPS Path |
@@ -207,6 +217,7 @@ For immediate deployment (bypasses 2-minute cron wait):
 ```bash
 ./deploy/deploy.sh              # Portfolio
 ./deploy/deploy-learn-apps.sh   # MySQL Learning
+./deploy/deploy-unix-learn.sh   # Unix Learning (builds Docker image too)
 ```
 
 ### Nginx Configuration
@@ -224,5 +235,17 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 | mysql-learn | Python/Gunicorn | 5001 | MySQL Learning Flask app |
 | unix-learn | Python/Gunicorn | 5003 | Unix Learning Flask app (uses Docker) |
 
+**Note:** Port 5002 is reserved by `/srv/gallery` (tag-api service). Use 5003+ for new apps.
+
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
+
+### Port Allocation
+
+| Port | Service | Notes |
+|------|---------|-------|
+| 3000 | Portfolio (Next.js) | Main website |
+| 5001 | MySQL Learning | Flask/Gunicorn |
+| 5002 | Gallery Tag API | **Reserved** - do not use |
+| 5003 | Unix Learning | Flask/Gunicorn + Docker |
+| 5555 | Prisma Studio | Dev only (`npm run prisma:studio`) |
 
