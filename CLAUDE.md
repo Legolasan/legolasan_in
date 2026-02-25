@@ -60,6 +60,7 @@ Note: `/blogs/admin/login` redirects to `/admin/login` for unified authenticatio
 
 - `/learn` - Landing page with learning module cards (extensible - add modules to `learningModules` array in `data.ts`)
 - `/learn/mysql/` - MySQL Learning Flask app (reverse proxied from port 5001)
+- `/learn/unix/` - Unix & Networking Learning Flask app (reverse proxied from port 5002, requires Docker)
 
 ### Adding New Learning Modules
 
@@ -70,16 +71,21 @@ Note: `/blogs/admin/login` redirects to `/admin/login` for unified authenticatio
 
 ```
 Learning Apps (Flask + Gunicorn + PM2)
-├── /home/ubuntu/apps/sql_learn/     # MySQL Learning app
-│   ├── venv/                        # Python virtual environment
-│   ├── wsgi.py                      # WSGI wrapper with ProxyFix
-│   ├── gunicorn_config.py           # Gunicorn config (port 5001)
-│   └── ecosystem.config.js          # PM2 config
+├── /home/ubuntu/apps/sql_learn/        # MySQL Learning app (port 5001)
+├── /home/ubuntu/apps/unix_networking/  # Unix Learning app (port 5002, uses Docker)
+│   ├── venv/                           # Python virtual environment
+│   ├── wsgi.py                         # WSGI wrapper with ProxyFix
+│   ├── gunicorn_config.py              # Gunicorn config
+│   └── ecosystem.config.js             # PM2 config
 ```
 
-**Deploy learning apps:** `./deploy/deploy-learn-apps.sh`
+**Deploy learning apps:**
+- `./deploy/deploy-learn-apps.sh` - MySQL Learning
+- `./deploy/deploy-unix-learn.sh` - Unix & Networking Learning
 
-PM2 process: `mysql-learn` → Gunicorn on port 5001 → Nginx reverse proxy at `/learn/mysql/`
+PM2 processes:
+- `mysql-learn` → port 5001 → `/learn/mysql/`
+- `unix-learn` → port 5002 → `/learn/unix/`
 
 ### URL Prefix Handling
 
@@ -163,6 +169,7 @@ Both apps deploy from GitHub repositories:
 |-----|-------------|----------|
 | Portfolio | `Legolasan/legolasan_in` | `/var/www/portfolio` |
 | MySQL Learning | `Legolasan/sql_learn` | `/home/ubuntu/apps/sql_learn` |
+| Unix Learning | `Legolasan/unix_networking` | `/home/ubuntu/apps/unix_networking` |
 
 ### Auto-Deploy via Cron (Pull-based)
 
@@ -172,11 +179,13 @@ VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 ```
 */2 * * * * /home/ubuntu/auto-deploy.sh              # Portfolio
 */2 * * * * /home/ubuntu/auto-deploy-mysql-learn.sh  # MySQL Learning
+*/2 * * * * /home/ubuntu/auto-deploy-unix-learn.sh   # Unix Learning
 ```
 
 **Logs:**
 - Portfolio: `/home/ubuntu/deploy.log`
 - MySQL Learning: `/home/ubuntu/deploy-mysql.log`
+- Unix Learning: `/home/ubuntu/deploy-unix.log`
 
 **How it works:**
 1. `git push` to GitHub
@@ -205,6 +214,7 @@ For immediate deployment (bypasses 2-minute cron wait):
 Located at `/etc/nginx/sites-available/portfolio.conf`:
 - Main Next.js app: `location /` → `http://127.0.0.1:3000`
 - MySQL Learning: `location /learn/mysql/` → `http://127.0.0.1:5001`
+- Unix Learning: `location /learn/unix/` → `http://127.0.0.1:5002`
 
 ### PM2 Processes
 
@@ -212,6 +222,7 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 |------|------|------|-------------|
 | portfolio | Node.js | 3000 | Main Next.js app |
 | mysql-learn | Python/Gunicorn | 5001 | MySQL Learning Flask app |
+| unix-learn | Python/Gunicorn | 5002 | Unix Learning Flask app (uses Docker) |
 
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 

@@ -368,5 +368,15 @@ export const learningModules: LearningModule[] = [
     topics: ['SQL Basics', 'B-Tree Indexes', 'Joins', 'Query Optimization', 'Transactions', 'Window Functions', 'InnoDB Internals'],
     difficulty: 'All Levels',
   },
+  {
+    id: '2',
+    name: 'Unix & Networking',
+    description: 'Interactive learning platform for Unix command-line and networking concepts. Practice real commands in a safe Docker sandbox environment with structured lessons from beginner to advanced.',
+    category: 'Systems',
+    icon: '🐧',
+    link: '/learn/unix/',
+    topics: ['File System', 'Processes', 'Permissions', 'Networking', 'Shell Scripting', 'System Administration'],
+    difficulty: 'All Levels',
+  },
 ];
 
