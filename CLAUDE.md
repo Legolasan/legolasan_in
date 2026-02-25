@@ -60,7 +60,7 @@ Note: `/blogs/admin/login` redirects to `/admin/login` for unified authenticatio
 
 - `/learn` - Landing page with learning module cards (extensible - add modules to `learningModules` array in `data.ts`)
 - `/learn/mysql/` - MySQL Learning Flask app (reverse proxied from port 5001)
-- `/learn/unix/` - Unix & Networking Learning Flask app (reverse proxied from port 5002, requires Docker)
+- `/learn/unix/` - Unix & Networking Learning Flask app (reverse proxied from port 5003, requires Docker)
 
 ### Adding New Learning Modules
 
@@ -72,7 +72,7 @@ Note: `/blogs/admin/login` redirects to `/admin/login` for unified authenticatio
 ```
 Learning Apps (Flask + Gunicorn + PM2)
 ├── /home/ubuntu/apps/sql_learn/        # MySQL Learning app (port 5001)
-├── /home/ubuntu/apps/unix_networking/  # Unix Learning app (port 5002, uses Docker)
+├── /home/ubuntu/apps/unix_networking/  # Unix Learning app (port 5003, uses Docker)
 │   ├── venv/                           # Python virtual environment
 │   ├── wsgi.py                         # WSGI wrapper with ProxyFix
 │   ├── gunicorn_config.py              # Gunicorn config
@@ -85,7 +85,7 @@ Learning Apps (Flask + Gunicorn + PM2)
 
 PM2 processes:
 - `mysql-learn` → port 5001 → `/learn/mysql/`
-- `unix-learn` → port 5002 → `/learn/unix/`
+- `unix-learn` → port 5003 → `/learn/unix/`
 
 ### URL Prefix Handling
 
@@ -214,7 +214,7 @@ For immediate deployment (bypasses 2-minute cron wait):
 Located at `/etc/nginx/sites-available/portfolio.conf`:
 - Main Next.js app: `location /` → `http://127.0.0.1:3000`
 - MySQL Learning: `location /learn/mysql/` → `http://127.0.0.1:5001`
-- Unix Learning: `location /learn/unix/` → `http://127.0.0.1:5002`
+- Unix Learning: `location /learn/unix/` → `http://127.0.0.1:5003`
 
 ### PM2 Processes
 
@@ -222,7 +222,7 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 |------|------|------|-------------|
 | portfolio | Node.js | 3000 | Main Next.js app |
 | mysql-learn | Python/Gunicorn | 5001 | MySQL Learning Flask app |
-| unix-learn | Python/Gunicorn | 5002 | Unix Learning Flask app (uses Docker) |
+| unix-learn | Python/Gunicorn | 5003 | Unix Learning Flask app (uses Docker) |
 
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 

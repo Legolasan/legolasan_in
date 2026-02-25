@@ -72,7 +72,7 @@ EOF
 # Create Gunicorn config
 echo "⚙️ Creating Gunicorn config..."
 cat > gunicorn_config.py << 'EOF'
-bind = "127.0.0.1:5002"
+bind = "127.0.0.1:5003"
 workers = 2
 threads = 2
 worker_class = "sync"
@@ -107,7 +107,7 @@ pm2 delete unix-learn 2>/dev/null || true
 pm2 start ecosystem.config.js
 pm2 save
 
-echo "✅ Unix Learning app deployed on port 5002"
+echo "✅ Unix Learning app deployed on port 5003"
 ENDSSH
 
 echo "🔧 Updating Nginx configuration..."
@@ -129,7 +129,7 @@ if ! grep -q "location /learn/unix/" $NGINX_CONF; then
     sudo sed -i '/location \/ {/i\
     # Unix & Networking Learning App\
     location /learn/unix/ {\
-        proxy_pass http://127.0.0.1:5002/;\
+        proxy_pass http://127.0.0.1:5003/;\
         proxy_http_version 1.1;\
         proxy_set_header Host $host;\
         proxy_set_header X-Real-IP $remote_addr;\
