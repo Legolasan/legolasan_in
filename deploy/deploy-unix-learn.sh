@@ -35,8 +35,10 @@ cd $UNIX_LEARN_DIR
 
 # Build the Docker sandbox image
 echo "🐳 Building Docker sandbox image..."
-if [ -f "Dockerfile" ]; then
-    docker build -t linux-sandbox:latest .
+if [ -f "docker/Dockerfile" ]; then
+    sudo docker build -t linux-sandbox:latest -f docker/Dockerfile docker/
+elif [ -f "Dockerfile" ]; then
+    sudo docker build -t linux-sandbox:latest .
 else
     echo "⚠️ No Dockerfile found, skipping Docker image build"
 fi
