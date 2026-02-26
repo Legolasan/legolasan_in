@@ -18,6 +18,9 @@ const navItems = [
   { name: 'Contact', href: '/#contact' },
 ]
 
+// Feature flag for resume download
+const RESUME_DOWNLOAD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -63,12 +66,14 @@ export default function Header() {
               </Link>
             ))}
             <ThemeToggle />
-            <button
-              onClick={() => setIsResumeModalOpen(true)}
-              className="px-4 py-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
-            >
-              Resume
-            </button>
+            {RESUME_DOWNLOAD_ENABLED && (
+              <button
+                onClick={() => setIsResumeModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+              >
+                Resume
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -116,15 +121,17 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false)
-                setIsResumeModalOpen(true)
-              }}
-              className="block w-full px-4 py-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-lg text-center mt-2"
-            >
-              Resume
-            </button>
+            {RESUME_DOWNLOAD_ENABLED && (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  setIsResumeModalOpen(true)
+                }}
+                className="block w-full px-4 py-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-lg text-center mt-2"
+              >
+                Resume
+              </button>
+            )}
           </motion.div>
         )}
       </nav>

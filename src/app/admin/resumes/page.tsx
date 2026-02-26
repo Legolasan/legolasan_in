@@ -57,6 +57,14 @@ export default function ResumeDownloadsPage() {
     <div>
       <h1 className="text-4xl font-bold text-gray-800 mb-8">Resume Downloads</h1>
 
+      {/* Feature Disabled Banner */}
+      {process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD !== 'true' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+          <p className="font-bold">⚠️ Feature Disabled</p>
+          <p className="text-sm">Resume downloads are currently disabled for public users. You can still view historical data here.</p>
+        </div>
+      )}
+
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

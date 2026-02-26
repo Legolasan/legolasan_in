@@ -53,6 +53,15 @@ function isBusinessEmail(email: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  // Feature flag check - early return if disabled
+  const isEnabled = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+  if (!isEnabled) {
+    return NextResponse.json(
+      { error: 'Resume download is currently disabled' },
+      { status: 503 } // 503 Service Unavailable
+    )
+  }
+
   try {
     const body = await request.json()
     const { email } = body
