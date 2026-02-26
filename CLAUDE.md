@@ -108,13 +108,15 @@ Flask apps served under a subpath need proper URL generation:
 - **"use client"** directive required for interactive components (hooks, state, browser APIs)
 - **Framer Motion** for animations throughout
 - **Path alias:** `@/*` maps to `./src/*`
-- **Static content:** Edit `src/lib/data.ts` for portfolio updates (projects, experience, skills, tools)
+- **Static content:** Edit `src/lib/data.ts` for portfolio updates (projects, experience, skills, tools, learning modules)
 - **Experience backup:** `src/lib/data.backup.ts` contains the original separate Technical Operations Manager + Product Support Manager roles. To restore, replace the merged entry in `data.ts` with the two entries from the backup file.
 - **Role-based auth:** First OAuth user auto-becomes admin; middleware protects `/admin/*` and `/blogs/admin/*`
 - **Geo-tracking:** IP geolocation via ip-api.com (free, 45 req/min, 24-hour caching). World map uses react-simple-maps with coordinates derived from city names.
 - **CSP Headers:** Configured in `next.config.js`. Add external domains to `connect-src` when needed (e.g., cdn.jsdelivr.net for map data).
 - **Rate limiting:** Use `rateLimiters.chat`, `.standard`, `.strict`, `.relaxed`, `.analytics` from `rateLimit.ts`. Get client IP with `getClientIP(request)`.
-- **Chat API:** SSE streaming with OpenAI, 10 questions/session, 20 questions/IP/day. Uses `ReadableStream` for real-time responses.
+- **Chat API:** SSE streaming with OpenAI, 10 questions/session, 20 questions/IP/day. Uses `ReadableStream` for real-time responses. Limit responses sent via same SSE stream format as normal responses.
+- **Input sanitization:** All API routes validate and sanitize inputs (max lengths, regex patterns). Check existing routes for reference patterns.
+- **Error handling:** Database errors in analytics/chat logging don't break requests (graceful degradation). Development mode shows detailed logs.
 - **Google Analytics 4:** Measurement ID `G-0R0F7W8JC4`. Configured in `src/app/layout.tsx` using Next.js `Script` component. **Important:** GA4 only tracks Next.js pages automatically. For non-Next.js pages (Flask apps, external learning modules), you must manually add the gtag script to their base template:
   ```html
   <!-- Add to <head> of Flask base.html or other templates -->
@@ -131,23 +133,59 @@ Flask apps served under a subpath need proper URL generation:
 
 Core models in `prisma/schema.prisma`:
 - `User` - OAuth users with role ("admin" or "user")
+- `Account`, `Session`, `VerificationToken` - NextAuth.js requirements
 - `BlogPost` - Blog entries with categories, tags, comments (status: "draft" | "published")
-- `ChatSession`/`ChatMessage` - AI chatbot conversation history
+- `Category`, `Tag`, `PostCategory`, `PostTag` - Blog taxonomy (many-to-many relations)
+- `Comment` - Blog comments with moderation (status: "pending" | "approved" | "rejected")
+- `ChatSession`/`ChatMessage` - AI chatbot conversation history with geo/device tracking
 - `PageView` - Custom analytics tracking (includes UTM params: `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`)
 - `ResumeDownload` - Resume request tracking with email/domain
 
-Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`).
+Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`). Strategic indexes on frequently queried fields.
 
 ## API Endpoints
 
-| Endpoint | Description |
-|----------|-------------|
-| `/api/analytics/track` | Track page views with geo data |
-| `/api/analytics/backfill-geo` | Backfill geo data for existing records |
-| `/api/chat` | AI chatbot (SSE streaming) |
-| `/api/auth/*` | NextAuth.js authentication |
-| `/api/blogs/*` | Blog CRUD operations |
-| `/api/resume-downloads` | Resume download tracking |
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/analytics/track` | POST | Track page views with geo data |
+| `/api/analytics/backfill-geo` | POST | Backfill geo data for existing records (admin only) |
+| `/api/chat` | POST | AI chatbot (SSE streaming with rate limits) |
+| `/api/auth/*` | GET/POST | NextAuth.js authentication |
+| `/api/blogs` | GET/POST | Blog CRUD operations |
+| `/api/blogs/search` | GET | Search blog posts by title/content |
+| `/api/categories` | GET/POST | Blog category management |
+| `/api/tags` | GET/POST | Blog tag management |
+| `/api/comments` | POST | Submit blog comments (moderation queue) |
+| `/api/chats` | GET | Chat history (admin only) |
+| `/api/github/*` | GET | GitHub stats proxy |
+| `/api/resume-downloads` | POST | Track resume downloads with email |
+| `/api/upload` | POST | File upload handler |
+
+## Important Development Patterns
+
+### API Route Structure
+- Always validate and sanitize inputs (see `/api/chat/route.ts` for reference)
+- Use `rateLimiters` from `rateLimit.ts` with `getClientIP(request)`
+- Return consistent error responses: `NextResponse.json({ error: 'message' }, { status: code })`
+- For streaming: Use `ReadableStream` with SSE format (`data: {JSON}\n\n`, end with `data: [DONE]\n\n`)
+- Graceful degradation: Analytics/logging failures shouldn't break requests
+
+### Database Queries
+- Reusable queries go in `src/lib/queries/` (see `posts.ts`, `categories.ts`, `comments.ts`)
+- Use Prisma singleton from `src/lib/db.ts`
+- Limit string field lengths before saving (check schema for max lengths)
+- Use try/catch blocks; log errors only in development mode
+
+### Component Patterns
+- Interactive components need `"use client"` directive
+- Use Framer Motion for animations (consistent `initial`, `animate`, `transition` props)
+- Theme-aware styling: Use Tailwind's dark mode classes (`dark:`)
+- Icons from `react-icons` library (e.g., `react-icons/fa`, `react-icons/bs`)
+
+### Session Management
+- Chat sessions: Client generates ID (`chat_${timestamp}_${random}`), stored in sessionStorage
+- NextAuth sessions: JWT strategy with role embedded, refreshed on each request
+- First OAuth user auto-becomes admin (check `User` table)
 
 ## Environment Variables
 
@@ -248,4 +286,59 @@ Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 | 5002 | Gallery Tag API | **Reserved** - do not use |
 | 5003 | Unix Learning | Flask/Gunicorn + Docker |
 | 5555 | Prisma Studio | Dev only (`npm run prisma:studio`) |
+
+## Common Tasks Quick Reference
+
+### Update Portfolio Content
+Edit `src/lib/data.ts` and modify:
+- `personalInfo` - Bio, contact info
+- `experiences` - Work history
+- `skills` - Technical skills by category
+- `projects` - Portfolio projects
+- `tools` - Tools/technologies showcase
+- `learningModules` - Learning hub modules
+
+Changes appear immediately on next page refresh (no rebuild needed for static content).
+
+### Add New Blog Post
+Use the blog admin UI at `/blogs/admin/` or create via API:
+```typescript
+POST /api/blogs
+{
+  title: string,
+  slug: string,  // URL-friendly (auto-generated if omitted)
+  content: string,  // HTML from Quill editor
+  excerpt: string,
+  status: "draft" | "published",
+  publishedAt?: string,  // ISO date
+  categoryIds?: string[],
+  tagNames?: string[]
+}
+```
+
+### Check Logs
+- **Portfolio:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy.log"`
+- **MySQL Learning:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy-mysql.log"`
+- **Unix Learning:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy-unix.log"`
+- **PM2 Logs:** `ssh ubuntu@195.35.22.87 "pm2 logs"`
+
+### Database Migrations
+```bash
+# Create migration after schema changes
+npm run prisma:migrate
+
+# View/edit data in browser UI
+npm run prisma:studio  # Opens http://localhost:5555
+```
+
+### Deploy Changes
+```bash
+# Auto-deploy (wait up to 2 minutes)
+git add . && git commit -m "message" && git push
+
+# Immediate deploy
+./deploy/deploy.sh              # Portfolio
+./deploy/deploy-learn-apps.sh   # MySQL Learning
+./deploy/deploy-unix-learn.sh   # Unix Learning
+```
 

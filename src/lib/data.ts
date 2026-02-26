@@ -336,6 +336,15 @@ export const tools: Tool[] = [
     link: 'https://github.com/Legolasan/unix_networking',
     technologies: ['Python', 'Flask', 'Docker'],
   },
+  {
+    id: '13',
+    name: 'Snowflake MCP Server',
+    description: 'Model Context Protocol server enabling Claude to interact with Snowflake data warehouses through natural language. Execute SQL queries, list tables, describe schemas, and monitor data freshness—all through conversation.',
+    category: 'AI & DevOps',
+    icon: '❄️',
+    link: 'https://github.com/Legolasan/snowflake_mcp',
+    technologies: ['Python', 'MCP', 'Snowflake'],
+  },
 ];
 
 export const personalInfo = {
