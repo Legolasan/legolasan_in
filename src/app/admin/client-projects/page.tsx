@@ -36,13 +36,15 @@ export default function ClientProjectsPage() {
       const response = await fetch('/api/client-projects');
 
       if (!response.ok) {
-        throw new Error('Failed to fetch projects');
+        const data = await response.json().catch(() => ({ error: 'Failed to fetch projects' }));
+        throw new Error(data.error || `Server error: ${response.status}`);
       }
 
       const data = await response.json();
       setProjects(data.projects);
     } catch (err: any) {
       setError(err.message);
+      console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,7 @@ export default function ClientProjectsPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Client Projects
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-700 dark:text-gray-300">
             Manage client preview projects and feedback
           </p>
         </div>
@@ -115,8 +117,13 @@ export default function ClientProjectsPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
-          <p className="text-red-800 dark:text-red-300">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg p-4 mb-6">
+          <p className="text-red-900 dark:text-red-200 font-semibold">⚠️ {error}</p>
+          {error.includes('fetch') && (
+            <p className="text-red-700 dark:text-red-300 text-sm mt-2">
+              The database tables may not be created yet. Wait a moment for the migration to run, then refresh the page.
+            </p>
+          )}
         </div>
       )}
 
@@ -126,7 +133,7 @@ export default function ClientProjectsPage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             No projects yet
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-gray-700 dark:text-gray-300 mb-6">
             Create your first client project to get started with feedback collection
           </p>
           <Link
@@ -158,7 +165,7 @@ export default function ClientProjectsPage() {
                 </div>
 
                 {project.description && (
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                  <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                     {project.description}
                   </p>
                 )}
@@ -167,7 +174,7 @@ export default function ClientProjectsPage() {
                   <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                     <FaComments />
                     <span className="font-semibold">{project._count.feedback}</span>
-                    <span className="text-gray-500 dark:text-gray-400">feedback</span>
+                    <span className="text-gray-700 dark:text-gray-300">feedback</span>
                   </div>
                 </div>
 
