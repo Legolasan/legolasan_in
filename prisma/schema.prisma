@@ -225,3 +225,59 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
+// Client Feedback System
+model ClientProject {
+  id            String   @id @default(cuid())
+  name          String   @db.VarChar(200)
+  slug          String   @unique @db.VarChar(100)
+  description   String?  @db.Text
+  githubRepo    String?  @db.VarChar(500)
+  vercelUrl     String?  @db.VarChar(500)
+  customDomain  String?  @db.VarChar(200)
+  accessToken   String   @unique @default(cuid())
+  accessEnabled Boolean  @default(true)
+  status        String   @default("active") // "active", "completed", "archived"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  feedback      ClientFeedback[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("client_projects")
+}
+
+model ClientFeedback {
+  id              String        @id @default(cuid())
+  projectId       String
+  project         ClientProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  content         String        @db.Text
+  pageUrl         String        @db.VarChar(1000)
+  pagePath        String        @db.VarChar(500)
+  elementSelector String?       @db.VarChar(500)
+  elementText     String?       @db.Text
+  elementHtml     String?       @db.Text
+  screenshotData  String?       @db.Text
+  positionX       Int?
+  positionY       Int?
+  viewportWidth   Int?
+  viewportHeight  Int?
+  clientName      String?       @db.VarChar(100)
+  clientEmail     String?       @db.VarChar(200)
+  ipAddress       String?       @db.VarChar(100)
+  userAgent       String?       @db.Text
+  status          String        @default("open") // "open", "in_progress", "resolved", "archived"
+  priority        String?       @default("normal") // "low", "normal", "high", "urgent"
+  category        String?       @db.VarChar(100) // "bug", "design", "content", "feature", "other"
+  adminNotes      String?       @db.Text
+  resolvedAt      DateTime?
+  resolvedBy      String?       @db.VarChar(100)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([pagePath])
+  @@index([createdAt])
+  @@map("client_feedback")
+}
+

@@ -74,6 +74,46 @@ const nextConfig = {
         ],
       },
       {
+        // CORS headers for feedback widget (allow cross-domain loading)
+        source: '/feedback-widget/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, OPTIONS',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600', // Cache widget for 1 hour
+          },
+        ],
+      },
+      {
+        // CORS headers for client feedback API (allow cross-domain submissions)
+        source: '/api/client-feedback/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
         // Cache static assets (Next.js uses content hashes, so safe to cache)
         source: '/_next/static/:path*',
         headers: [

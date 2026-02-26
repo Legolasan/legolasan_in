@@ -4,7 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect } from 'react'
-import { FaHome, FaChartBar, FaRobot, FaDownload, FaSignOutAlt, FaCog, FaBlog } from 'react-icons/fa'
+import { FaHome, FaChartBar, FaRobot, FaDownload, FaSignOutAlt, FaCog, FaBlog, FaUsers } from 'react-icons/fa'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
@@ -121,6 +121,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <FaDownload />
                 <span>Resume Downloads</span>
+              </Link>
+              <Link
+                href="/admin/client-projects"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  pathname?.startsWith('/admin/client-projects')
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                }`}
+              >
+                <FaUsers />
+                <span>Client Projects</span>
               </Link>
               <Link
                 href="/admin/settings"
