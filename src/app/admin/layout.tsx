@@ -122,6 +122,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <FaDownload />
                 <span>Resume Downloads</span>
               </Link>
+              <Link
+                href="/admin/settings"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/admin/settings')
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                }`}
+              >
+                <FaCog />
+                <span>Settings</span>
+              </Link>
 
               <div className="border-t border-gray-200 my-4"></div>
 

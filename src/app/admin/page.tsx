@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { FaChartBar, FaRobot, FaDownload, FaEye, FaUsers, FaBlog } from 'react-icons/fa'
+import { FaChartBar, FaRobot, FaDownload, FaEye, FaUsers, FaBlog, FaCog } from 'react-icons/fa'
 
 interface DashboardStats {
   totalPageViews: number
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
 
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Links</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link
             href="/admin/analytics"
             className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-600 hover:bg-primary-50 transition-all"
@@ -151,6 +151,14 @@ export default function AdminDashboard() {
             <FaBlog className="text-primary-600 mb-2" size={24} />
             <h3 className="font-semibold text-gray-800">Blog Admin</h3>
             <p className="text-sm text-gray-600">Manage blog posts and comments</p>
+          </Link>
+          <Link
+            href="/admin/settings"
+            className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-600 hover:bg-primary-50 transition-all"
+          >
+            <FaCog className="text-primary-600 mb-2" size={24} />
+            <h3 className="font-semibold text-gray-800">Settings</h3>
+            <p className="text-sm text-gray-600">Toggle feature flags and settings</p>
           </Link>
         </div>
       </div>
