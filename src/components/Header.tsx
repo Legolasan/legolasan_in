@@ -23,8 +23,9 @@ const conditionalNavItems = [
   { name: 'Services', href: '/services', requiresFlag: true },
 ]
 
-// Feature flag for resume download
+// Feature flags
 const RESUME_DOWNLOAD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+const SERVICES_ENABLED = process.env.NEXT_PUBLIC_ENABLE_SERVICES === 'true'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -70,7 +71,7 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            {RESUME_DOWNLOAD_ENABLED && conditionalNavItems.map((item) => (
+            {SERVICES_ENABLED && conditionalNavItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -135,7 +136,7 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            {RESUME_DOWNLOAD_ENABLED && conditionalNavItems.map((item) => (
+            {SERVICES_ENABLED && conditionalNavItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}

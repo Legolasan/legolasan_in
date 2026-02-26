@@ -76,7 +76,7 @@ export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Check if services feature is enabled
-  const isServicesEnabled = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+  const isServicesEnabled = process.env.NEXT_PUBLIC_ENABLE_SERVICES === 'true'
 
   const handleGetStarted = (serviceId: ServiceType) => {
     setSelectedService(serviceId)

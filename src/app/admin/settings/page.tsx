@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react'
 import { FaCog, FaToggleOn, FaToggleOff, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa'
 
 interface FeatureFlags {
-  resumeAndServicesEnabled: boolean
+  resumeDownloadEnabled: boolean
+  servicesEnabled: boolean
 }
+
+type FlagKey = 'resumeDownload' | 'services'
 
 export default function AdminSettingsPage() {
   const [flags, setFlags] = useState<FeatureFlags | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  const [savingFlag, setSavingFlag] = useState<FlagKey | null>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
 
@@ -32,8 +35,8 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const toggleFeature = async (enabled: boolean) => {
-    setIsSaving(true)
+  const toggleFeature = async (flag: FlagKey, enabled: boolean) => {
+    setSavingFlag(flag)
     setSaveStatus('idle')
     setStatusMessage('')
 
@@ -41,13 +44,18 @@ export default function AdminSettingsPage() {
       const res = await fetch('/api/admin/feature-flags', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
+        body: JSON.stringify({ flag, enabled })
       })
 
       const data = await res.json()
 
       if (res.ok) {
-        setFlags({ resumeAndServicesEnabled: enabled })
+        // Update local state
+        setFlags(prev => prev ? {
+          ...prev,
+          [`${flag}Enabled`]: enabled
+        } : null)
+
         setSaveStatus('success')
         setStatusMessage(data.message || 'Settings updated successfully')
 
@@ -70,7 +78,7 @@ export default function AdminSettingsPage() {
       setSaveStatus('error')
       setStatusMessage('Network error. Please try again.')
     } finally {
-      setIsSaving(false)
+      setSavingFlag(null)
     }
   }
 
@@ -112,50 +120,108 @@ export default function AdminSettingsPage() {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Feature Flags</h2>
 
         <div className="space-y-6">
-          {/* Resume & Services Toggle */}
+          {/* Resume Download Toggle */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-primary-300 transition-colors">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold text-gray-800">
-                  Resume & Services Features
+                  Resume Download
                 </h3>
                 <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                  flags?.resumeAndServicesEnabled
+                  flags?.resumeDownloadEnabled
                     ? 'bg-green-100 text-green-800'
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {flags?.resumeAndServicesEnabled ? 'Enabled' : 'Disabled'}
+                  {flags?.resumeDownloadEnabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
               <p className="text-sm text-gray-600">
-                Controls visibility of Resume download button and Services page in navigation.
-                {!flags?.resumeAndServicesEnabled && ' Currently hidden from public users.'}
+                Controls visibility of Resume download button in navigation header.
+                {!flags?.resumeDownloadEnabled && ' Currently hidden from public users.'}
               </p>
               <div className="mt-2 text-xs text-gray-500">
-                <strong>When enabled:</strong> Resume button + Services link visible
+                <strong>When enabled:</strong> Resume button visible in header
                 <br />
-                <strong>When disabled:</strong> Resume button + Services link hidden, API returns 503
+                <strong>When disabled:</strong> Resume button hidden, API returns 503
               </div>
             </div>
 
             <div className="ml-6">
               <button
-                onClick={() => toggleFeature(!flags?.resumeAndServicesEnabled)}
-                disabled={isSaving}
+                onClick={() => toggleFeature('resumeDownload', !flags?.resumeDownloadEnabled)}
+                disabled={savingFlag === 'resumeDownload'}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-                  isSaving
+                  savingFlag === 'resumeDownload'
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : flags?.resumeAndServicesEnabled
+                    : flags?.resumeDownloadEnabled
                     ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-gray-400 hover:bg-gray-500 text-white'
                 }`}
               >
-                {isSaving ? (
+                {savingFlag === 'resumeDownload' ? (
                   <>
                     <FaSpinner className="animate-spin" />
                     Saving...
                   </>
-                ) : flags?.resumeAndServicesEnabled ? (
+                ) : flags?.resumeDownloadEnabled ? (
+                  <>
+                    <FaToggleOn size={20} />
+                    Enabled
+                  </>
+                ) : (
+                  <>
+                    <FaToggleOff size={20} />
+                    Disabled
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Services Page Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-primary-300 transition-colors">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Services Page
+                </h3>
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                  flags?.servicesEnabled
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {flags?.servicesEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Controls visibility of Services navigation link and page access.
+                {!flags?.servicesEnabled && ' Currently hidden from public users.'}
+              </p>
+              <div className="mt-2 text-xs text-gray-500">
+                <strong>When enabled:</strong> Services link visible, page accessible
+                <br />
+                <strong>When disabled:</strong> Services link hidden, page shows unavailable message
+              </div>
+            </div>
+
+            <div className="ml-6">
+              <button
+                onClick={() => toggleFeature('services', !flags?.servicesEnabled)}
+                disabled={savingFlag === 'services'}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                  savingFlag === 'services'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : flags?.servicesEnabled
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-gray-400 hover:bg-gray-500 text-white'
+                }`}
+              >
+                {savingFlag === 'services' ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Saving...
+                  </>
+                ) : flags?.servicesEnabled ? (
                   <>
                     <FaToggleOn size={20} />
                     Enabled
@@ -184,7 +250,7 @@ export default function AdminSettingsPage() {
                 </h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <p>
-                    Toggling features requires rebuilding the Next.js app (~30-60 seconds).
+                    Each feature can be toggled independently. Toggling requires rebuilding the Next.js app (~30-60 seconds).
                     The app will automatically restart after the rebuild completes.
                     Historical data in admin dashboards remains accessible even when features are disabled.
                   </p>
@@ -206,6 +272,10 @@ export default function AdminSettingsPage() {
           <div className="flex justify-between py-2 border-b border-gray-200">
             <span className="font-medium text-gray-700">Next.js Version:</span>
             <span className="text-gray-600">14.2.35</span>
+          </div>
+          <div className="flex justify-between py-2">
+            <span className="font-medium text-gray-700">Feature Flags:</span>
+            <span className="text-gray-600">2 available</span>
           </div>
         </div>
       </div>

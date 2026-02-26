@@ -60,8 +60,8 @@ export default function ResumeDownloadsPage() {
       {/* Feature Disabled Banner */}
       {process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD !== 'true' && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
-          <p className="font-bold">⚠️ Feature Disabled</p>
-          <p className="text-sm">Resume downloads are currently disabled for public users. You can still view historical data here.</p>
+          <p className="font-bold">⚠️ Resume Download Feature Disabled</p>
+          <p className="text-sm">Resume downloads are currently disabled for public users. You can still view historical data here. Go to Settings to re-enable.</p>
         </div>
       )}
 

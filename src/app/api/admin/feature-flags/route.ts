@@ -17,10 +17,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const isEnabled = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+    const resumeEnabled = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+    const servicesEnabled = process.env.NEXT_PUBLIC_ENABLE_SERVICES === 'true'
 
     return NextResponse.json({
-      resumeAndServicesEnabled: isEnabled
+      resumeDownloadEnabled: resumeEnabled,
+      servicesEnabled: servicesEnabled
     })
   } catch (error) {
     console.error('Error reading feature flags:', error)
@@ -41,14 +43,31 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { enabled } = body
+    const { flag, enabled } = body
 
-    if (typeof enabled !== 'boolean') {
+    if (!flag || typeof enabled !== 'boolean') {
       return NextResponse.json(
-        { error: 'Invalid request body' },
+        { error: 'Invalid request body. Expected { flag: string, enabled: boolean }' },
         { status: 400 }
       )
     }
+
+    // Validate flag name
+    const validFlags = ['resumeDownload', 'services']
+    if (!validFlags.includes(flag)) {
+      return NextResponse.json(
+        { error: `Invalid flag name. Must be one of: ${validFlags.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Map flag names to env variable names
+    const flagMapping: { [key: string]: string } = {
+      resumeDownload: 'NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD',
+      services: 'NEXT_PUBLIC_ENABLE_SERVICES'
+    }
+
+    const envVarName = flagMapping[flag]
 
     // Path to .env file
     const envPath = join(process.cwd(), '.env')
@@ -58,8 +77,8 @@ export async function POST(request: NextRequest) {
       let envContent = readFileSync(envPath, 'utf8')
 
       // Update or add the feature flag
-      const flagLine = `NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD=${enabled ? 'true' : 'false'}`
-      const flagRegex = /NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD=.*/
+      const flagLine = `${envVarName}=${enabled ? 'true' : 'false'}`
+      const flagRegex = new RegExp(`${envVarName}=.*`)
 
       if (flagRegex.test(envContent)) {
         // Update existing line
@@ -83,11 +102,17 @@ export async function POST(request: NextRequest) {
           .catch(err => console.error('❌ Error rebuilding app:', err))
       }
 
+      const featureNames: { [key: string]: string } = {
+        resumeDownload: 'Resume Download',
+        services: 'Services Page'
+      }
+
       return NextResponse.json({
         success: true,
         message: enabled
-          ? 'Resume and Services features enabled. Rebuilding app...'
-          : 'Resume and Services features disabled. Rebuilding app...',
+          ? `${featureNames[flag]} feature enabled. Rebuilding app...`
+          : `${featureNames[flag]} feature disabled. Rebuilding app...`,
+        flag,
         enabled,
         rebuilding: isProduction
       })
