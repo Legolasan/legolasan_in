@@ -18,6 +18,11 @@ const navItems = [
   { name: 'Contact', href: '/#contact' },
 ]
 
+// Conditional nav items (require feature flag)
+const conditionalNavItems = [
+  { name: 'Services', href: '/services', requiresFlag: true },
+]
+
 // Feature flag for resume download
 const RESUME_DOWNLOAD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
 
@@ -57,6 +62,15 @@ export default function Header() {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium"
+              >
+                {item.name}
+              </Link>
+            ))}
+            {RESUME_DOWNLOAD_ENABLED && conditionalNavItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -112,6 +126,16 @@ export default function Header() {
             className="md:hidden mt-4 pb-4 space-y-2"
           >
             {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+            {RESUME_DOWNLOAD_ENABLED && conditionalNavItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}

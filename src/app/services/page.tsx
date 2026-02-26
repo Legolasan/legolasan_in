@@ -75,6 +75,9 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  // Check if services feature is enabled
+  const isServicesEnabled = process.env.NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD === 'true'
+
   const handleGetStarted = (serviceId: ServiceType) => {
     setSelectedService(serviceId)
     setIsModalOpen(true)
@@ -85,10 +88,43 @@ export default function ServicesPage() {
     setSelectedService(null)
   }
 
+  // Show message if services are disabled
+  if (!isServicesEnabled) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <Header />
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl text-center"
+          >
+            <div className="text-6xl mb-6">🚧</div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary-600 via-accent-600 to-secondary-600 bg-clip-text text-transparent">
+              Services Currently Unavailable
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+              I'm not accepting new service inquiries at the moment. Please check back later or reach out via the contact form for general inquiries.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-semibold"
+            >
+              <FaArrowLeft className="mr-2" />
+              Back to Portfolio
+            </Link>
+          </motion.div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">
         <div className="container mx-auto max-w-6xl">
