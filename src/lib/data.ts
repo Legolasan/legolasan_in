@@ -345,6 +345,15 @@ export const tools: Tool[] = [
     link: 'https://github.com/Legolasan/snowflake_mcp',
     technologies: ['Python', 'MCP', 'Snowflake'],
   },
+  {
+    id: '14',
+    name: 'Zendesk Ticket Analysis System',
+    description: 'AI-powered customer satisfaction analysis for Zendesk support tickets. Automatically analyzes solved tickets using Claude/GPT to evaluate tonality, professionalism, empathy, and responsiveness. Provides interactive dashboards for tracking agent performance and customer satisfaction trends.',
+    category: 'AI & Analytics',
+    icon: '🎯',
+    link: 'https://github.com/Legolasan/zendesk_ticket_training',
+    technologies: ['Python', 'Flask', 'PostgreSQL', 'Claude/GPT', 'Zendesk API'],
+  },
 ];
 
 export const personalInfo = {
