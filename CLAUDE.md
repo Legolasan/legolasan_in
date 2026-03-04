@@ -52,9 +52,29 @@ src/
 - `/admin/analytics` - Page views with world map visualization
 - `/admin/chats` - AI chatbot conversation logs
 - `/admin/resumes` - Resume download tracking
+- `/admin/client-projects` - Client project management
+- `/admin/client-feedback` - Client feedback management (view, categorize, resolve)
 - `/blogs/admin/` - Blog-specific admin (posts, categories, tags, comments)
+- `/stats` or `stats.legolasan.in` - Real-time system monitoring dashboard (terminal-themed)
 
 Note: `/blogs/admin/login` redirects to `/admin/login` for unified authentication.
+
+## Stats Dashboard (stats.legolasan.in)
+
+Terminal-themed real-time monitoring dashboard showing system health and process metrics. Admin-only access.
+
+**Features:**
+- System resources: CPU, memory, disk usage with progress bars
+- PM2 process monitoring: Status, CPU, memory, uptime, restart count
+- Service health checks: Nginx, PostgreSQL, MariaDB status
+- Endpoint health: HTTP health checks with response times (ports 3000, 5001, 5003)
+- Auto-refresh every 5 seconds (toggle to pause)
+- Terminal aesthetic: Neon green on dark background, monospace fonts, ASCII box characters
+
+**Architecture:**
+- Subdomain `stats.legolasan.in` rewrites to `/stats` route via Nginx
+- Smart caching: System (5s), PM2 (2s), Services (30s) to reduce system load
+- Rate limited: 30 requests/minute per IP
 
 ## Learning Hub
 
@@ -103,6 +123,41 @@ Flask apps served under a subpath need proper URL generation:
 
 **Important:** If templates use hardcoded URLs like `href="/concepts"`, they will 404 when served under `/learn/unix/`. Always use `url_for('blueprint.route_name')` in Flask templates.
 
+## Client Feedback System
+
+Embeddable feedback widget for client projects. Allows clients to submit feedback with screenshots, element selection, and context.
+
+### Architecture
+- **Widget:** Embeddable JavaScript widget served from `/feedback-widget/*` (CORS-enabled)
+- **API:** Token-based authentication for external access (`/api/client-feedback`)
+- **Admin:** Full dashboard at `/admin/client-projects` and `/admin/client-feedback`
+
+### Client Project Setup
+1. Create project in admin panel at `/admin/client-projects`
+2. Generate unique access token (auto-generated, can be regenerated)
+3. Embed widget in client project using provided snippet
+4. Clients submit feedback with screenshots, element references, and context
+5. Admin reviews, categorizes, and resolves feedback
+
+### Authentication Model
+- **Admin access:** Full CRUD via NextAuth session
+- **Client access:** Read-only project data + submit feedback via access token
+- **Token validation:** Checked on every request, can be disabled per project
+
+### Feedback Metadata Captured
+- Page URL, path, viewport dimensions
+- Element selector, text, and HTML (if clicked on element)
+- Screenshot data (base64)
+- Position (x, y) coordinates
+- Client name/email (optional)
+- IP address and user agent
+- Geo location (via standard geo-tracking)
+
+### Status Workflow
+Feedback status: `open` → `in_progress` → `resolved` | `archived`
+Priority levels: `low`, `normal`, `high`, `urgent`
+Categories: `bug`, `design`, `content`, `feature`, `other`
+
 ## Key Patterns
 
 - **"use client"** directive required for interactive components (hooks, state, browser APIs)
@@ -113,6 +168,7 @@ Flask apps served under a subpath need proper URL generation:
 - **Role-based auth:** First OAuth user auto-becomes admin; middleware protects `/admin/*` and `/blogs/admin/*`
 - **Geo-tracking:** IP geolocation via ip-api.com (free, 45 req/min, 24-hour caching). World map uses react-simple-maps with coordinates derived from city names.
 - **CSP Headers:** Configured in `next.config.js`. Add external domains to `connect-src` when needed (e.g., cdn.jsdelivr.net for map data).
+- **CORS Configuration:** Client feedback API (`/api/client-feedback/*`) has CORS enabled (`Access-Control-Allow-Origin: *`) for embedded widget usage. Feedback widget static files (`/feedback-widget/*`) also have CORS headers.
 - **Rate limiting:** Use `rateLimiters.chat`, `.standard`, `.strict`, `.relaxed`, `.analytics` from `rateLimit.ts`. Get client IP with `getClientIP(request)`.
 - **Chat API:** SSE streaming with OpenAI, 10 questions/session, 20 questions/IP/day. Uses `ReadableStream` for real-time responses. Limit responses sent via same SSE stream format as normal responses.
 - **Input sanitization:** All API routes validate and sanitize inputs (max lengths, regex patterns). Check existing routes for reference patterns.
@@ -140,6 +196,10 @@ Core models in `prisma/schema.prisma`:
 - `ChatSession`/`ChatMessage` - AI chatbot conversation history with geo/device tracking
 - `PageView` - Custom analytics tracking (includes UTM params: `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`)
 - `ResumeDownload` - Resume request tracking with email/domain
+- `ClientProject` - Client projects with feedback widget integration (access token-based auth)
+- `ClientFeedback` - Client feedback submissions with screenshots, element selectors, and admin workflow (status: "open" | "in_progress" | "resolved" | "archived")
+- `DeploymentLog` - Deployment history tracking (app name, status, commit SHA, duration, errors)
+- `ApiMetric` - API performance tracking (endpoint, method, status code, response time)
 
 Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`). Strategic indexes on frequently queried fields.
 
@@ -160,6 +220,11 @@ Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`)
 | `/api/github/*` | GET | GitHub stats proxy |
 | `/api/resume-downloads` | POST | Track resume downloads with email |
 | `/api/upload` | POST | File upload handler |
+| `/api/client-feedback` | GET/POST/PUT | Client feedback system (CORS-enabled, token or admin auth) |
+| `/api/client-feedback/export` | GET | Export feedback as CSV/JSON (admin only) |
+| `/api/stats/system` | GET | System resources (CPU, memory, disk, uptime) - admin only, 5s cache |
+| `/api/stats/pm2` | GET | PM2 process monitoring (status, CPU, memory) - admin only, 2s cache |
+| `/api/stats/services` | GET | Service health checks (Nginx, PostgreSQL, MariaDB) - admin only, 30s cache |
 
 ## Important Development Patterns
 

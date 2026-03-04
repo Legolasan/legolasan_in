@@ -1,0 +1,109 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    STATS DASHBOARD PREVIEW                                ║
+║                   stats.legolasan.in                                      ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+╔═══════════════════════════════════════╗
+║  SYSTEM STATUS MONITOR v1.0.0         ║        [AUTO-REFRESH [ON]]
+╚═══════════════════════════════════════╝        LAST UPDATE: 10:30:45 PM
+
+┌─ SYSTEM RESOURCES ──────────────────────────────────────────────────────┐
+│                                                                          │
+│  ┌─ CPU USAGE ────┐  ┌─ MEMORY ────────┐  ┌─ DISK USAGE ────┐         │
+│  │                 │  │                  │  │                  │         │
+│  │   68.3%         │  │   72%            │  │   27%            │         │
+│  │                 │  │                  │  │                  │         │
+│  │ [████████░░]    │  │ [███████░░░]     │  │ [███░░░░░░░]     │         │
+│  │                 │  │                  │  │                  │         │
+│  │ CORES: 8        │  │ USED: 5.8 GB     │  │ USED: 26.3 GB    │         │
+│  │ LOAD: 1.2,      │  │ TOTAL: 8 GB      │  │ TOTAL: 96 GB     │         │
+│  │       1.1, 0.9  │  │                  │  │                  │         │
+│  └─────────────────┘  └──────────────────┘  └──────────────────┘         │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ PM2 PROCESSES ──────────────────────────────────────────────────────────┐
+│                                                                          │
+│  ID  NAME           STATUS        CPU    MEMORY   UPTIME      RESTARTS  │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  0   portfolio      [✓] ONLINE    12%    245MB    23d 4h 12m  0         │
+│  1   mysql-learn    [✓] ONLINE    3%     89MB     23d 4h 11m  0         │
+│  2   unix-learn     [✓] ONLINE    5%     102MB    23d 4h 10m  1         │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ SYSTEM SERVICES ────────────┐    ┌─ ENDPOINT HEALTH ─────────────────┐
+│                               │    │                                    │
+│  [✓] NGINX         RUNNING    │    │  [✓] http://127.0.0.1:3000       │
+│  [✓] POSTGRESQL    RUNNING    │    │      [200]  45ms                  │
+│  [✓] MARIADB       RUNNING    │    │                                   │
+│  [✓] PM2           RUNNING    │    │  [✓] http://127.0.0.1:5001       │
+│                               │    │      [200]  23ms                  │
+└───────────────────────────────┘    │                                   │
+                                     │  [✓] http://127.0.0.1:5003       │
+                                     │      [200]  67ms                  │
+                                     │                                   │
+                                     └───────────────────────────────────┘
+
+┌─ SYSTEM INFO ────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  UPTIME: 23d 4h 12m                                                      │
+│  PLATFORM: Intel(R) Xeon(R) CPU @ 2.20GHz                               │
+│  HOSTNAME: legolasan.in                                                  │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+                [STATS DASHBOARD] - Refreshing every 5 seconds
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         COLOR SCHEME                                      ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║  Background:     #0a0e27 (Dark Navy)                                     ║
+║  Primary Text:   #00ff41 (Neon Green) ████                               ║
+║  Secondary:      #00d9ff (Cyan) ████                                      ║
+║  Status OK:      #00ff41 (Green) [✓]                                     ║
+║  Status Error:   #ff0000 (Red) [✗]                                       ║
+║  Borders:        #00ff41 (Neon Green with glow effect)                   ║
+║  Font:           Monospace (JetBrains Mono / System Mono)                ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      INTERACTIVE FEATURES                                 ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║  ⚡ Auto-Refresh:     Toggle ON/OFF button (refreshes every 5 seconds)   ║
+║  🎯 Hover Effects:    Boxes glow on hover with neon green shadow         ║
+║  📊 Progress Bars:    ASCII-style bars with filled/empty characters      ║
+║  🔄 Animations:       Smooth Framer Motion transitions                   ║
+║  📱 Responsive:       Stacks vertically on mobile devices                ║
+║  🔐 Protected:        Admin-only access via NextAuth                     ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       MATRIX-STYLE ANIMATIONS                             ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║  • Cards fade in from bottom with staggered delays                       ║
+║  • Numbers update smoothly without jarring changes                       ║
+║  • Auto-refresh icon spins when active                                   ║
+║  • Glow effects on borders (0_0_10px_rgba(0,255,65,0.3))                ║
+║  • Hover increases glow intensity                                        ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+                        🚀 READY TO DEPLOY! 🚀
+
+                    Next Steps (see STATS_SETUP.md):
+                    1. Run database migration
+                    2. Update SSL certificate
+                    3. Configure Nginx
+                    4. Deploy code
+                    5. Visit stats.legolasan.in
+

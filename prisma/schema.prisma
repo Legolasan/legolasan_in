@@ -281,3 +281,34 @@ model ClientFeedback {
   @@map("client_feedback")
 }
 
+model DeploymentLog {
+  id         String   @id @default(cuid())
+  appName    String   @db.VarChar(50) // "portfolio", "mysql-learn", "unix-learn"
+  status     String   @db.VarChar(20) // "success", "failed"
+  commitSha  String?  @db.VarChar(40)
+  errorMsg   String?  @db.Text
+  duration   Int?     // seconds
+  createdAt  DateTime @default(now())
+
+  @@index([appName])
+  @@index([createdAt])
+  @@index([status])
+  @@map("deployment_logs")
+}
+
+model ApiMetric {
+  id            String   @id @default(cuid())
+  endpoint      String   @db.VarChar(200)
+  method        String   @db.VarChar(10) // GET, POST, etc.
+  statusCode    Int
+  responseTime  Int      // milliseconds
+  userAgent     String?  @db.Text
+  ipAddress     String?  @db.VarChar(100)
+  createdAt     DateTime @default(now())
+
+  @@index([endpoint])
+  @@index([createdAt])
+  @@index([statusCode])
+  @@map("api_metrics")
+}
+
