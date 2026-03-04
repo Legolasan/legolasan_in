@@ -244,7 +244,7 @@ VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 
 ### VPS Infrastructure
 
-- **Server:** `ubuntu@195.35.22.87` (Ubuntu 22.04)
+- **Server:** `ubuntu@XXXX22.87` (Ubuntu 22.04)
 - **Domain:** https://legolasan.in
 - **Process Manager:** PM2 (Node.js + Python apps)
 - **Web Server:** Nginx (reverse proxy + SSL via Let's Encrypt)
@@ -317,10 +317,10 @@ POST /api/blogs
 ```
 
 ### Check Logs
-- **Portfolio:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy.log"`
-- **MySQL Learning:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy-mysql.log"`
-- **Unix Learning:** `ssh ubuntu@195.35.22.87 "tail -f /home/ubuntu/deploy-unix.log"`
-- **PM2 Logs:** `ssh ubuntu@195.35.22.87 "pm2 logs"`
+- **Portfolio:** `ssh ubuntu@XXXX22.87 "tail -f /home/ubuntu/deploy.log"`
+- **MySQL Learning:** `ssh ubuntu@XXXX22.87 "tail -f /home/ubuntu/deploy-mysql.log"`
+- **Unix Learning:** `ssh ubuntu@XXXX22.87 "tail -f /home/ubuntu/deploy-unix.log"`
+- **PM2 Logs:** `ssh ubuntu@XXXX22.87 "pm2 logs"`
 
 ### Database Migrations
 ```bash
