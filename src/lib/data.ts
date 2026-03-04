@@ -364,9 +364,9 @@ export const personalInfo = {
   location: 'Bengaluru, Karnataka',
   bio: "Cloud SaaS leader with 13+ years spanning technical support, operations leadership, and product management. I enjoy understanding how systems break in the real world and turning those lessons into platform reliability improvements.",
   bioExtended: [
-    "At Hevo, I own the roadmap for connector reliability and platform hardening across 20+ integrations, driving cross-functional execution with Engineering, Support, and SRE teams.",
-    "I've progressed from hands-on troubleshooting of distributed data pipelines and databases to leading global support teams. My work spans PostgreSQL, MySQL, Snowflake, Redshift, and cloud platforms like AWS, GCP, and Azure.",
-    "Strong background in incident management, enterprise escalations, and translating customer pain points into scalable engineering improvements."
+    "Technical Operations Leader driving excellence at the intersection of Support, Engineering, and Product. Currently leading 24x7 global support operations for 1,000+ customers on a cloud ETL platform, improving SLA adherence to >95%, reducing MTTR by 28%, and converting production failures into product reliability initiatives.",
+    "10+ years building high-performing support teams, mentoring technical leaders, and translating customer pain into roadmap priorities. Deep expertise across cloud platforms (AWS, GCP, Azure), distributed data pipelines, and enterprise escalation management.",
+    "Proven track record of turning support from a cost center into a strategic product advantage through OKR-driven execution, automation initiatives, and cross-functional stakeholder alignment."
   ],
   socialLinks: {
     github: 'https://github.com/legolasan',
