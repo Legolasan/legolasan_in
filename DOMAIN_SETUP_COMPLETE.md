@@ -23,7 +23,7 @@
 
 ## Current Status
 
-- ✅ Website is running on HTTP (http://195.35.22.87)
+- ✅ Website is running on HTTP (http://XXX.XX.XX.XX)
 - ⏳ Waiting for DNS configuration
 - ⏳ SSL will be set up automatically once DNS is configured
 
@@ -32,8 +32,8 @@
 ### Step 1: Configure DNS (REQUIRED)
 
 Follow the instructions in `DNS_SETUP_GUIDE.md` to:
-1. Add A record: `legalasan.in` → `195.35.22.87`
-2. Add A record: `www.legalasan.in` → `195.35.22.87`
+1. Add A record: `legalasan.in` → `XXX.XX.XX.XX`
+2. Add A record: `www.legalasan.in` → `XXX.XX.XX.XX`
 
 ### Step 2: Verify DNS Propagation
 
@@ -45,7 +45,7 @@ dig legalasan.in +short
 dig www.legalasan.in +short
 ```
 
-Both should return: `195.35.22.87`
+Both should return: `XXX.XX.XX.XX`
 
 ### Step 3: Deploy Again (Automatic SSL Setup)
 

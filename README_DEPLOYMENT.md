@@ -89,7 +89,7 @@ The watcher monitors:
 
 **Deployment failing?**
 - Check your SSH connection to the server
-- Verify the server is accessible: `ssh root@195.35.22.87`
+- Verify the server is accessible: `ssh root@XXX.XX.XX.XX`
 - Check the deployment script: `./deploy/deploy.sh`
 
 **Changes not reflecting?**

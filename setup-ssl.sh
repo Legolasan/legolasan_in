@@ -5,7 +5,7 @@
 
 set -e
 
-SERVER="root@195.35.22.87"
+SERVER="root@XXX.XX.XX.XX"
 DOMAIN="legolasan.in"
 
 echo "🔐 SSL Certificate Setup for $DOMAIN"
@@ -23,10 +23,10 @@ echo "🔍 Verifying DNS configuration..."
 LEGALASAN_IP=$(ssh $SERVER "dig +short legolasan.in | head -1")
 WWW_IP=$(ssh $SERVER "dig +short www.legolasan.in | head -1")
 
-if [ "$LEGALASAN_IP" != "195.35.22.87" ] || [ "$WWW_IP" != "195.35.22.87" ]; then
+if [ "$LEGALASAN_IP" != "XXX.XX.XX.XX" ] || [ "$WWW_IP" != "XXX.XX.XX.XX" ]; then
     echo "❌ DNS not configured correctly!"
-    echo "   legolasan.in resolves to: $LEGALASAN_IP (expected: 195.35.22.87)"
-    echo "   www.legolasan.in resolves to: $WWW_IP (expected: 195.35.22.87)"
+    echo "   legolasan.in resolves to: $LEGALASAN_IP (expected: XXX.XX.XX.XX)"
+    echo "   www.legolasan.in resolves to: $WWW_IP (expected: XXX.XX.XX.XX)"
     echo ""
     echo "Please configure DNS first. See DNS_SETUP_GUIDE.md for instructions."
     exit 1

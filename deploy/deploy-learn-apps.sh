@@ -5,7 +5,7 @@
 
 set -e
 
-SERVER="ubuntu@195.35.22.87"
+SERVER="ubuntu@XXX.XX.XX.XX"
 APPS_DIR="/home/ubuntu/apps"
 
 echo "🎓 Deploying Learning Apps..."

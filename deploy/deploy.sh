@@ -7,7 +7,7 @@
 set -e
 
 # Configuration
-SERVER="ubuntu@195.35.22.87"
+SERVER="ubuntu@XXX.XX.XX.XX"
 REMOTE_DIR="/var/www/portfolio"
 REPO_URL="https://github.com/Legolasan/legolasan_in.git"
 

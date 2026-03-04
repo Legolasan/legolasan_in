@@ -13,7 +13,7 @@ This guide will help you set up the complete blog CMS system on your VPS server.
 ### Install PostgreSQL (if not already installed)
 
 ```bash
-ssh root@195.35.22.87
+ssh root@XXX.XX.XX.XX
 apt-get update
 apt-get install -y postgresql postgresql-contrib
 ```
@@ -106,7 +106,7 @@ openssl rand -base64 32
 After setting up the database and environment variables:
 
 ```bash
-ssh root@195.35.22.87
+ssh root@XXX.XX.XX.XX
 cd /var/www/portfolio
 npx prisma migrate deploy
 ```
@@ -120,7 +120,7 @@ The first user to sign in via OAuth will automatically be assigned the `admin` r
 To manually promote a user to admin:
 
 ```bash
-ssh root@195.35.22.87
+ssh root@XXX.XX.XX.XX
 sudo -u postgres psql portfolio_db
 ```
 
@@ -133,7 +133,7 @@ UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 Ensure the uploads directory exists and has proper permissions:
 
 ```bash
-ssh root@195.35.22.87
+ssh root@XXX.XX.XX.XX
 cd /var/www/portfolio
 mkdir -p public/uploads
 chmod 755 public/uploads

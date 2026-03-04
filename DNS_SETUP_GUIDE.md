@@ -21,7 +21,7 @@ You need to add **TWO** A records:
 ```
 Type: A
 Name: @ (or leave blank, or enter: legalasan.in)
-Value: 195.35.22.87
+Value: XXX.XX.XX.XX
 TTL: 3600 (or use default)
 ```
 
@@ -29,7 +29,7 @@ TTL: 3600 (or use default)
 ```
 Type: A
 Name: www
-Value: 195.35.22.87
+Value: XXX.XX.XX.XX
 TTL: 3600 (or use default)
 ```
 
@@ -59,11 +59,11 @@ nslookup www.legalasan.in
 - https://www.whatsmydns.net/
 - https://dnschecker.org/
 
-Both should return: `195.35.22.87`
+Both should return: `XXX.XX.XX.XX`
 
 ## Step 6: Once DNS is Propagated
 
-Once both domains point to `195.35.22.87`, proceed with SSL certificate setup (this will be done automatically in the deployment).
+Once both domains point to `XXX.XX.XX.XX`, proceed with SSL certificate setup (this will be done automatically in the deployment).
 
 ## Common Issues
 
