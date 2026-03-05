@@ -332,15 +332,28 @@ git pull origin main
 npm ci
 npx prisma generate
 npx prisma migrate deploy
+
+# CRITICAL: Clear Next.js cache to prevent stale chunk references
+rm -rf .next/cache
+
 npm run build
-# CRITICAL: Copy static files to standalone
+
+# CRITICAL: Clean and copy static files to standalone
+rm -rf .next/standalone/public .next/standalone/.next/static
 cp -r public .next/standalone/
 cp -r .next/static .next/standalone/.next/
-# Restart PM2 from standalone directory
+
+# Stop then delete to ensure clean restart (clears in-memory cache)
+pm2 stop portfolio
 pm2 delete portfolio
 cd .next/standalone && PORT=3000 pm2 start server.js --name portfolio
 pm2 save
 ```
+
+**Why cache clearing matters:**
+- Next.js generates unique hashes for each chunk file (e.g., `1875-abc123.js`)
+- Each build creates NEW hashes, but cached HTML may reference OLD hashes
+- Without clearing cache, users get "ChunkLoadError" because old chunks don't exist
 
 **Note:** GitHub Actions workflow exists but VPS provider blocks incoming SSH from GitHub IPs. Cron-based pull is the workaround.
 
@@ -518,6 +531,23 @@ git add . && git commit -m "message" && git push
 **Error: `Application error: client-side exception` on page load**
 - Missing static files in standalone directory
 - Fix: `cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/`
+
+**Error: `ChunkLoadError: Loading chunk XXXX failed` after deployment**
+- **Root Cause:** Next.js caches HTML that references old chunk hashes. After a new build, chunks get new hashes but cached HTML still points to old (non-existent) chunks.
+- **Why it happens:**
+  1. Build 1 creates `1875-abc123.js`, HTML references this hash
+  2. Build 2 creates `1875-def456.js` (new hash), but cached HTML still requests `abc123`
+  3. Browser requests non-existent chunk → 400 error → page crash
+- **Immediate fix for users:** Hard refresh with `Cmd+Shift+R` (Mac) or `Ctrl+Shift+R` (Windows)
+- **Server-side fix:**
+  ```bash
+  # Clear Next.js cache and restart
+  pm2 stop portfolio
+  rm -rf /var/www/portfolio/.next/cache
+  pm2 start portfolio
+  ```
+- **If Cloudflare is caching:** Purge cache in Cloudflare Dashboard → Caching → Purge Everything
+- **Prevention:** The auto-deploy script now clears `.next/cache` before each build
 
 **404 after deployment despite successful build**
 - Server running old build (PM2 didn't pick up new files)
