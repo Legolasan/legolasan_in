@@ -55,13 +55,13 @@ src/
 - `/admin/client-projects` - Client project management
 - `/admin/client-feedback` - Client feedback management (view, categorize, resolve)
 - `/blogs/admin/` - Blog-specific admin (posts, categories, tags, comments)
-- `/stats` or `stats.legolasan.in` - Real-time system monitoring dashboard (terminal-themed)
+- `stats.legolasan.in` - Real-time system monitoring dashboard (standalone service, not part of portfolio)
 
 Note: `/blogs/admin/login` redirects to `/admin/login` for unified authentication.
 
-## Stats Dashboard (stats.legolasan.in)
+## Stats Dashboard (stats.legolasan.in) - STANDALONE
 
-Terminal-themed real-time monitoring dashboard showing system health and process metrics.
+Terminal-themed real-time monitoring dashboard. **Completely independent** from the portfolio - survives portfolio failures.
 
 **Features:**
 - System resources: CPU, memory, disk usage with progress bars
@@ -69,15 +69,31 @@ Terminal-themed real-time monitoring dashboard showing system health and process
 - Service health checks: Nginx, PostgreSQL, MariaDB status
 - Endpoint health: HTTP health checks with response times (ports 3000, 5001, 5003)
 - Auto-refresh every 5 seconds (toggle to pause)
-- Terminal aesthetic: Neon green (#00ff41) on dark navy (#0a0e27), monospace fonts, ASCII box characters
+- Terminal aesthetic: Neon green (#00ff41) on dark navy (#0a0e27), monospace fonts
 
 **Architecture:**
-- **Authentication:** Protected by Cloudflare Zero Trust at subdomain level (NOT NextAuth)
-- **Nginx:** Subdomain `stats.legolasan.in` rewrites ONLY exact root `/` to `/stats` (prevents `/stats/stats` loop)
+- **Standalone Express app** at `/home/ubuntu/apps/stats-dashboard/` (port 5004)
+- **Zero dependencies on portfolio** - no Next.js, no Prisma, no shared code
+- **Authentication:** Protected by Cloudflare Zero Trust at subdomain level
 - **Caching:** System (5s), PM2 (2s), Services (30s) to reduce system load
-- **Rate limiting:** 30 requests/minute per IP
+- **Rate limiting:** 60 requests/minute per IP (in-memory)
 
-**Important:** The stats page and API routes (`/api/stats/*`) do NOT require NextAuth authentication because Cloudflare Zero Trust handles auth at the edge. This prevents redirect loops to `/admin/login`.
+**Why standalone?**
+| Scenario | Stats Shows |
+|----------|-------------|
+| Prisma migration fails | PM2: portfolio errored, endpoint unhealthy |
+| TypeScript build error | PM2: portfolio stopped |
+| Next.js runtime crash | PM2: portfolio offline, restart count increasing |
+| Bad deploy | PM2 status + endpoint response times |
+
+**Deployment:**
+```bash
+./deploy/deploy-stats-dashboard.sh  # Deploys to VPS
+```
+
+**VPS Location:** `/home/ubuntu/apps/stats-dashboard/`
+- `server.js` - Express server with all API endpoints
+- `public/` - Static HTML, CSS, JS
 
 ## Learning Hub
 
@@ -225,9 +241,11 @@ Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`)
 | `/api/upload` | POST | File upload handler |
 | `/api/client-feedback` | GET/POST/PUT | Client feedback system (CORS-enabled, token or admin auth) |
 | `/api/client-feedback/export` | GET | Export feedback as CSV/JSON (admin only) |
-| `/api/stats/system` | GET | System resources (CPU, memory, disk, uptime) - admin only, 5s cache |
-| `/api/stats/pm2` | GET | PM2 process monitoring (status, CPU, memory) - admin only, 2s cache |
-| `/api/stats/services` | GET | Service health checks (Nginx, PostgreSQL, MariaDB) - admin only, 30s cache |
+
+**Stats API (Standalone Service on port 5004):**
+| `stats.legolasan.in/api/system` | GET | System resources (CPU, memory, disk, uptime) |
+| `stats.legolasan.in/api/pm2` | GET | PM2 process monitoring |
+| `stats.legolasan.in/api/services` | GET | Service + endpoint health checks |
 
 ## Important Development Patterns
 
@@ -364,9 +382,10 @@ cp -r .next/static .next/standalone/.next/
 
 For immediate deployment (bypasses 2-minute cron wait):
 ```bash
-./deploy/deploy.sh              # Portfolio
-./deploy/deploy-learn-apps.sh   # MySQL Learning
-./deploy/deploy-unix-learn.sh   # Unix Learning (builds Docker image too)
+./deploy/deploy.sh                  # Portfolio
+./deploy/deploy-learn-apps.sh       # MySQL Learning
+./deploy/deploy-unix-learn.sh       # Unix Learning (builds Docker image too)
+./deploy/deploy-stats-dashboard.sh  # Stats Dashboard (standalone, no git repo)
 ```
 
 ### Nginx Configuration
@@ -375,33 +394,29 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 - Main Next.js app: `location /` → `http://127.0.0.1:3000`
 - MySQL Learning: `location /learn/mysql/` → `http://127.0.0.1:5001`
 - Unix Learning: `location /learn/unix/` → `http://127.0.0.1:5003`
-- Stats subdomain: `stats.legolasan.in` → rewrite to `/stats` route
+- Stats subdomain: `stats.legolasan.in` → `http://127.0.0.1:5004` (standalone service)
 
-**Stats Subdomain Configuration (IMPORTANT):**
-The stats subdomain uses a special rewrite pattern to avoid redirect loops:
+**Stats Subdomain Configuration:**
+Now simplified - direct proxy to standalone stats service:
 
 ```nginx
-# Only rewrite exact root path to /stats
-location = / {
-    rewrite ^ /stats break;
-    proxy_pass http://localhost:3000;
-    proxy_set_header Host legolasan.in;  # Use main domain for cookies
-    # ... other headers
-}
+server {
+    listen 443 ssl http2;
+    server_name stats.legolasan.in;
 
-# All other paths pass through directly (no rewrite)
-location / {
-    proxy_pass http://localhost:3000;
-    proxy_set_header Host legolasan.in;
-    # ... other headers
+    ssl_certificate /etc/letsencrypt/live/legolasan.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/legolasan.in/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:5004;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
 ```
-
-**Why this matters:**
-- `location = /` matches ONLY the exact root path
-- When user visits `stats.legolasan.in/`, it rewrites to `/stats`
-- Next.js client-side router may change URL to `/stats` in browser
-- If we rewrote ALL paths (`rewrite ^(.*)$ /stats$1`), `/stats` would become `/stats/stats` → 404
 
 **Cloudflare Zero Trust:**
 - Stats subdomain is behind Cloudflare Zero Trust
@@ -415,8 +430,9 @@ location / {
 | portfolio | Node.js | 3000 | Main Next.js app |
 | mysql-learn | Python/Gunicorn | 5001 | MySQL Learning Flask app |
 | unix-learn | Python/Gunicorn | 5003 | Unix Learning Flask app (uses Docker) |
+| stats-dashboard | Node.js | 5004 | **Standalone** system monitoring (independent of portfolio) |
 
-**Note:** Port 5002 is reserved by `/srv/gallery` (tag-api service). Use 5003+ for new apps.
+**Note:** Port 5002 is reserved by `/srv/gallery` (tag-api service).
 
 Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 
@@ -428,6 +444,7 @@ Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
 | 5001 | MySQL Learning | Flask/Gunicorn |
 | 5002 | Gallery Tag API | **Reserved** - do not use |
 | 5003 | Unix Learning | Flask/Gunicorn + Docker |
+| 5004 | Stats Dashboard | **Standalone** Express.js (independent of portfolio) |
 | 5555 | Prisma Studio | Dev only (`npm run prisma:studio`) |
 
 ## Common Tasks Quick Reference
@@ -480,9 +497,10 @@ npm run prisma:studio  # Opens http://localhost:5555
 git add . && git commit -m "message" && git push
 
 # Immediate deploy
-./deploy/deploy.sh              # Portfolio
-./deploy/deploy-learn-apps.sh   # MySQL Learning
-./deploy/deploy-unix-learn.sh   # Unix Learning
+./deploy/deploy.sh                  # Portfolio
+./deploy/deploy-learn-apps.sh       # MySQL Learning
+./deploy/deploy-unix-learn.sh       # Unix Learning
+./deploy/deploy-stats-dashboard.sh  # Stats Dashboard (code embedded in script)
 ```
 
 ## Troubleshooting
@@ -508,17 +526,23 @@ git add . && git commit -m "message" && git push
 
 ### Stats Dashboard Issues
 
-**Redirect loop to `/admin/login`**
-- Stats page was using NextAuth but should use Cloudflare Zero Trust
-- Stats API routes should NOT check `session.user.role === 'admin'`
+**Stats dashboard not loading**
+- Check if standalone service is running: `pm2 status stats-dashboard`
+- Check logs: `pm2 logs stats-dashboard`
+- Verify port 5004 is listening: `netstat -tlnp | grep 5004`
 
-**404 on `stats.legolasan.in/stats` (double /stats)**
-- Nginx rewrite pattern is wrong - should only rewrite exact root `/`
-- Use `location = /` for exact match, not `location /`
+**Stats shows portfolio as offline when it crashed**
+- This is expected! Stats is designed to diagnose portfolio failures
+- Stats showing "portfolio: stopped" or "endpoint unhealthy" confirms it's working
 
 **SSL certificate errors on stats subdomain**
 - Cloudflare Zero Trust blocks Let's Encrypt verification
 - Solution: Use existing certificate, Cloudflare handles edge SSL
+
+**Redeploy stats dashboard**
+```bash
+./deploy/deploy-stats-dashboard.sh
+```
 
 ### PM2 Issues
 
