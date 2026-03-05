@@ -61,7 +61,7 @@ Note: `/blogs/admin/login` redirects to `/admin/login` for unified authenticatio
 
 ## Stats Dashboard (stats.legolasan.in)
 
-Terminal-themed real-time monitoring dashboard showing system health and process metrics. Admin-only access.
+Terminal-themed real-time monitoring dashboard showing system health and process metrics.
 
 **Features:**
 - System resources: CPU, memory, disk usage with progress bars
@@ -69,12 +69,15 @@ Terminal-themed real-time monitoring dashboard showing system health and process
 - Service health checks: Nginx, PostgreSQL, MariaDB status
 - Endpoint health: HTTP health checks with response times (ports 3000, 5001, 5003)
 - Auto-refresh every 5 seconds (toggle to pause)
-- Terminal aesthetic: Neon green on dark background, monospace fonts, ASCII box characters
+- Terminal aesthetic: Neon green (#00ff41) on dark navy (#0a0e27), monospace fonts, ASCII box characters
 
 **Architecture:**
-- Subdomain `stats.legolasan.in` rewrites to `/stats` route via Nginx
-- Smart caching: System (5s), PM2 (2s), Services (30s) to reduce system load
-- Rate limited: 30 requests/minute per IP
+- **Authentication:** Protected by Cloudflare Zero Trust at subdomain level (NOT NextAuth)
+- **Nginx:** Subdomain `stats.legolasan.in` rewrites ONLY exact root `/` to `/stats` (prevents `/stats/stats` loop)
+- **Caching:** System (5s), PM2 (2s), Services (30s) to reduce system load
+- **Rate limiting:** 30 requests/minute per IP
+
+**Important:** The stats page and API routes (`/api/stats/*`) do NOT require NextAuth authentication because Cloudflare Zero Trust handles auth at the edge. This prevents redirect loops to `/admin/login`.
 
 ## Learning Hub
 
@@ -305,6 +308,22 @@ VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 2. VPS detects new commits within 2 minutes
 3. Auto-pulls and rebuilds
 
+**Auto-deploy script steps (for standalone mode):**
+```bash
+git pull origin main
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm run build
+# CRITICAL: Copy static files to standalone
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+# Restart PM2 from standalone directory
+pm2 delete portfolio
+cd .next/standalone && PORT=3000 pm2 start server.js --name portfolio
+pm2 save
+```
+
 **Note:** GitHub Actions workflow exists but VPS provider blocks incoming SSH from GitHub IPs. Cron-based pull is the workaround.
 
 ### VPS Infrastructure
@@ -313,6 +332,33 @@ VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 - **Domain:** https://legolasan.in
 - **Process Manager:** PM2 (Node.js + Python apps)
 - **Web Server:** Nginx (reverse proxy + SSL via Let's Encrypt)
+
+### Next.js Standalone Mode (CRITICAL)
+
+This project uses `output: "standalone"` in `next.config.js`. This has important implications:
+
+**How Standalone Mode Works:**
+- Build creates a self-contained server at `.next/standalone/server.js`
+- Does NOT work with `npm start` or `next start` (will show error)
+- Must run: `node .next/standalone/server.js`
+
+**Required Post-Build Steps:**
+After `npm run build`, you MUST copy static assets:
+```bash
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+```
+
+**PM2 Configuration:**
+- Must run from standalone directory: `cd .next/standalone && pm2 start server.js --name portfolio`
+- Script path should be: `/var/www/portfolio/.next/standalone/server.js`
+- Working directory should be: `/var/www/portfolio/.next/standalone`
+
+**Common Errors:**
+- `"next start" does not work with "output: standalone"` → Use `node server.js` instead
+- `Could not find a production build in the '.next' directory` → PM2 running from wrong directory
+- `Application error: client-side exception` → Missing static files (forgot to copy public/static)
+- 404 errors after deploy → Server running old build (check PM2 is restarted correctly)
 
 ### Manual Deployment Scripts
 
@@ -329,6 +375,38 @@ Located at `/etc/nginx/sites-available/portfolio.conf`:
 - Main Next.js app: `location /` → `http://127.0.0.1:3000`
 - MySQL Learning: `location /learn/mysql/` → `http://127.0.0.1:5001`
 - Unix Learning: `location /learn/unix/` → `http://127.0.0.1:5003`
+- Stats subdomain: `stats.legolasan.in` → rewrite to `/stats` route
+
+**Stats Subdomain Configuration (IMPORTANT):**
+The stats subdomain uses a special rewrite pattern to avoid redirect loops:
+
+```nginx
+# Only rewrite exact root path to /stats
+location = / {
+    rewrite ^ /stats break;
+    proxy_pass http://localhost:3000;
+    proxy_set_header Host legolasan.in;  # Use main domain for cookies
+    # ... other headers
+}
+
+# All other paths pass through directly (no rewrite)
+location / {
+    proxy_pass http://localhost:3000;
+    proxy_set_header Host legolasan.in;
+    # ... other headers
+}
+```
+
+**Why this matters:**
+- `location = /` matches ONLY the exact root path
+- When user visits `stats.legolasan.in/`, it rewrites to `/stats`
+- Next.js client-side router may change URL to `/stats` in browser
+- If we rewrote ALL paths (`rewrite ^(.*)$ /stats$1`), `/stats` would become `/stats/stats` → 404
+
+**Cloudflare Zero Trust:**
+- Stats subdomain is behind Cloudflare Zero Trust
+- SSL certificate expansion may fail (Let's Encrypt can't verify through Zero Trust)
+- Solution: Use existing cert, Cloudflare handles edge SSL
 
 ### PM2 Processes
 
@@ -406,4 +484,61 @@ git add . && git commit -m "message" && git push
 ./deploy/deploy-learn-apps.sh   # MySQL Learning
 ./deploy/deploy-unix-learn.sh   # Unix Learning
 ```
+
+## Troubleshooting
+
+### Standalone Mode Issues
+
+**Error: `"next start" does not work with "output: standalone"`**
+- PM2 is running `npm start` instead of `node server.js`
+- Fix: `pm2 delete portfolio && cd /var/www/portfolio/.next/standalone && pm2 start server.js --name portfolio`
+
+**Error: `Could not find a production build in the '.next' directory`**
+- PM2 is running from wrong directory (project root instead of standalone)
+- Check: `pm2 show portfolio` should show script path ending in `.next/standalone/server.js`
+
+**Error: `Application error: client-side exception` on page load**
+- Missing static files in standalone directory
+- Fix: `cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/`
+
+**404 after deployment despite successful build**
+- Server running old build (PM2 didn't pick up new files)
+- Check BUILD_ID: `cat /var/www/portfolio/.next/standalone/.next/BUILD_ID`
+- Fix: Full restart: `pm2 delete portfolio && cd /var/www/portfolio/.next/standalone && pm2 start server.js --name portfolio`
+
+### Stats Dashboard Issues
+
+**Redirect loop to `/admin/login`**
+- Stats page was using NextAuth but should use Cloudflare Zero Trust
+- Stats API routes should NOT check `session.user.role === 'admin'`
+
+**404 on `stats.legolasan.in/stats` (double /stats)**
+- Nginx rewrite pattern is wrong - should only rewrite exact root `/`
+- Use `location = /` for exact match, not `location /`
+
+**SSL certificate errors on stats subdomain**
+- Cloudflare Zero Trust blocks Let's Encrypt verification
+- Solution: Use existing certificate, Cloudflare handles edge SSL
+
+### PM2 Issues
+
+**Process keeps restarting (restart count increasing)**
+- Check logs: `pm2 logs portfolio --lines 50`
+- Usually means wrong start command or missing dependencies
+
+**Port 3000 already in use**
+- Kill existing processes: `lsof -ti:3000 | xargs -r kill -9`
+- Then restart PM2
+
+**Changes not reflected after restart**
+- PM2 caches the old process configuration
+- Fix: `pm2 delete portfolio` then start fresh
+
+### Git Issues on VPS
+
+**Error: `detected dubious ownership in repository`**
+- Fix: `git config --global --add safe.directory /var/www/portfolio`
+
+**Error: `untracked working tree files would be overwritten`**
+- Remove conflicting files: `rm -f <files>` then `git pull`
 
