@@ -1,9 +1,31 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useState, useEffect, Component, ReactNode } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial, MeshWobbleMaterial } from '@react-three/drei'
 import * as THREE from 'three'
+
+// Error boundary to catch Three.js errors
+class ThreeErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback
+    }
+    return this.props.children
+  }
+}
 
 function Icosahedron() {
   const meshRef = useRef<THREE.Mesh>(null)
@@ -128,23 +150,68 @@ function Particles() {
   )
 }
 
-export default function FloatingGeometry() {
+// Fallback animated background (same as original Hero blobs)
+function FallbackBackground() {
   return (
-    <div className="absolute inset-0 z-0">
-      <Canvas
-        camera={{ position: [0, 0, 6], fov: 45 }}
-        style={{ background: 'transparent' }}
-        gl={{ alpha: true, antialias: true }}
-      >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} color="#8b5cf6" />
-
-        <Icosahedron />
-        <TorusKnot />
-        <Octahedron />
-        <Particles />
-      </Canvas>
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
+      <div className="absolute top-40 right-10 w-72 h-72 bg-accent-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
+      <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
     </div>
+  )
+}
+
+function ThreeScene() {
+  return (
+    <Canvas
+      camera={{ position: [0, 0, 6], fov: 45 }}
+      style={{ background: 'transparent' }}
+      gl={{ alpha: true, antialias: true, powerPreference: 'default', failIfMajorPerformanceCaveat: true }}
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x000000, 0)
+      }}
+    >
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <pointLight position={[-10, -10, -5]} intensity={0.5} color="#8b5cf6" />
+
+      <Icosahedron />
+      <TorusKnot />
+      <Octahedron />
+      <Particles />
+    </Canvas>
+  )
+}
+
+export default function FloatingGeometry() {
+  const [isWebGLAvailable, setIsWebGLAvailable] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    // Check WebGL availability on client side only
+    try {
+      const canvas = document.createElement('canvas')
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      setIsWebGLAvailable(!!gl)
+    } catch {
+      setIsWebGLAvailable(false)
+    }
+  }, [])
+
+  // Still loading - render nothing
+  if (isWebGLAvailable === null) {
+    return <FallbackBackground />
+  }
+
+  // WebGL not available - show fallback
+  if (!isWebGLAvailable) {
+    return <FallbackBackground />
+  }
+
+  return (
+    <ThreeErrorBoundary fallback={<FallbackBackground />}>
+      <div className="absolute inset-0 z-0">
+        <ThreeScene />
+      </div>
+    </ThreeErrorBoundary>
   )
 }
