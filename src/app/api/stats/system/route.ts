@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { rateLimiters, getClientIP } from '@/lib/rateLimit';
 import os from 'os';
 import { exec } from 'child_process';
@@ -117,17 +115,9 @@ async function getSystemStats(): Promise<SystemStats> {
   return stats;
 }
 
+// Note: This endpoint is protected by Cloudflare Zero Trust at subdomain level
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      );
-    }
-
     // Rate limiting
     const ip = getClientIP(request);
     const { success } = rateLimiters.standard.check(ip);

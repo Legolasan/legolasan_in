@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiCpu, FiHardDrive, FiActivity, FiServer, FiRefreshCw, FiPower } from 'react-icons/fi';
 import { BsMemory } from 'react-icons/bs';
@@ -52,9 +50,10 @@ interface EndpointHealth {
   healthy: boolean;
 }
 
+// Note: This page is protected by Cloudflare Zero Trust at the subdomain level
+// No NextAuth authentication required here
+
 export default function StatsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [pm2Stats, setPm2Stats] = useState<PM2Process[]>([]);
   const [services, setServices] = useState<ServiceStatus[]>([]);
@@ -62,15 +61,6 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-
-  // Redirect if not admin
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login');
-    } else if (status === 'authenticated' && session?.user?.role !== 'admin') {
-      router.push('/');
-    }
-  }, [status, session, router]);
 
   const fetchSystemStats = async () => {
     try {
@@ -116,22 +106,20 @@ export default function StatsPage() {
   };
 
   useEffect(() => {
-    if (session?.user?.role === 'admin') {
-      fetchAllStats();
-    }
-  }, [session]);
+    fetchAllStats();
+  }, []);
 
   useEffect(() => {
-    if (!autoRefresh || session?.user?.role !== 'admin') return;
+    if (!autoRefresh) return;
 
     const interval = setInterval(() => {
       fetchAllStats();
     }, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(interval);
-  }, [autoRefresh, session]);
+  }, [autoRefresh]);
 
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0e27] flex items-center justify-center">
         <div className="text-[#00ff41] font-mono text-xl animate-pulse">
@@ -139,10 +127,6 @@ export default function StatsPage() {
         </div>
       </div>
     );
-  }
-
-  if (session?.user?.role !== 'admin') {
-    return null;
   }
 
   const formatBytes = (bytes: number) => {
