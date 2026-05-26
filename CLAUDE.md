@@ -331,12 +331,17 @@ Both apps deploy from GitHub repositories:
 
 VPS pulls from GitHub every 2 minutes and deploys if changes detected.
 
-**Cron jobs on VPS:**
+**CRITICAL — these cron jobs MUST live in `root`'s crontab (`sudo crontab -l`), NOT `ubuntu`'s.**
+All PM2 services run under **root**'s PM2 instance (the boot unit is `pm2-root.service`). The deploy scripts call `pm2 restart <name>` / `pm2 start ...`, which only see the PM2 instance of the user running them. If a deploy job runs as `ubuntu`, its `pm2` commands hit ubuntu's (empty) PM2 and **silently never touch the live process** — the build may even succeed while the site stays frozen on an old build indefinitely. Building as `ubuntu` also fails with `EACCES` because root owns files under `.next`. See the troubleshooting entry "Pushes don't reflect on the live site" below.
+
+**Cron jobs on VPS (in `root`'s crontab):**
 ```
 */2 * * * * /home/ubuntu/auto-deploy.sh              # Portfolio
 */2 * * * * /home/ubuntu/auto-deploy-mysql-learn.sh  # MySQL Learning
 */2 * * * * /home/ubuntu/auto-deploy-unix-learn.sh   # Unix Learning
+*/2 * * * * /home/ubuntu/auto-deploy-sql-playground.sh  # SQL Playground
 ```
+(Scripts live in `/home/ubuntu/` but are invoked by root's cron. Root has `safe.directory` configured for each repo to avoid git "dubious ownership" errors.)
 
 **Logs:**
 - Portfolio: `/home/ubuntu/deploy.log`
@@ -469,7 +474,9 @@ server {
 
 **Note:** Port 5002 is reserved by `/srv/gallery` (tag-api service).
 
-Commands: `pm2 list`, `pm2 logs`, `pm2 restart all`
+**All services run under `root`'s PM2 instance** (`sudo pm2 list`), not `ubuntu`'s. Always manage them as root (`sudo pm2 ...`). Running `pm2 list` as `ubuntu` shows an empty/different instance and is a common source of confusion. The boot/resurrect unit is `pm2-root.service`.
+
+Commands: `sudo pm2 list`, `sudo pm2 logs`, `sudo pm2 restart all`
 
 ### Port Allocation
 
@@ -575,6 +582,28 @@ git add . && git commit -m "message" && git push
 - Server running old build (PM2 didn't pick up new files)
 - Check BUILD_ID: `cat /var/www/portfolio/.next/standalone/.next/BUILD_ID`
 - Fix: Full restart: `pm2 delete portfolio && cd /var/www/portfolio/.next/standalone && pm2 start server.js --name portfolio`
+
+**Pushes don't reflect on the live site (deploy silently does nothing)**
+- **Symptom:** `git push` succeeds, the VPS pulls the commit (`git log` shows it), Cloudflare isn't caching (`cf-cache-status: DYNAMIC`), yet the site keeps serving an old build. `sudo pm2 show portfolio` shows a very long uptime / restart count not increasing.
+- **Root cause:** The deploy cron is running as the wrong user. All PM2 services run under **root**'s PM2, but if a deploy job is in `ubuntu`'s crontab, its `pm2 restart`/`pm2 start` commands target ubuntu's (empty) PM2 and never touch the live root-owned process. The build also fails for ubuntu with `EACCES: permission denied, unlink '.../.next/standalone/.next/cache/...'` because root owns those files.
+- **Diagnose:**
+  ```bash
+  sudo pm2 list                          # services should be here, under root
+  sudo -u ubuntu pm2 list                # if portfolio is here instead, that's the bug
+  crontab -l                             # as root — deploy jobs MUST be here
+  crontab -u ubuntu -l                   # should NOT contain deploy jobs
+  tail -40 /home/ubuntu/deploy.log       # look for EACCES / "Script not found: server.js"
+  ```
+- **Fix:** Move all `auto-deploy*.sh` cron jobs into **root**'s crontab (remove from ubuntu's), and add `sudo git config --global --add safe.directory <repo>` for each repo so root's `git pull` doesn't hit "dubious ownership."
+- **Immediate manual recovery** (rebuild + restart the live process as root):
+  ```bash
+  cd /var/www/portfolio
+  sudo rm -rf .next/cache .next/standalone/.next/cache
+  sudo npm run build
+  sudo rm -rf .next/standalone/public .next/standalone/.next/static
+  sudo cp -r public .next/standalone/ && sudo cp -r .next/static .next/standalone/.next/
+  sudo pm2 restart portfolio && sudo pm2 save
+  ```
 
 ### Stats Dashboard Issues
 
