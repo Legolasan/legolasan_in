@@ -100,9 +100,23 @@ export const projects: Project[] = [
 export const experiences: Experience[] = [
   {
     id: '1',
+    company: 'Exotel',
+    position: 'Senior Technical Support Manager',
+    duration: '2026 - Present',
+    location: 'Bengaluru, Karnataka',
+    description: [
+      'Lead the technical support function for the Platform and AI Services verticals on Exotel\'s CPaaS (Communications Platform-as-a-Service) stack spanning voice, messaging, and conversational AI products.',
+      'Manage and mentor the support team across both verticals, owning escalation processes, on-call coverage, SLA adherence, and incident-response standards.',
+      'Own P0/P1 incident response, driving root-cause analysis, cross-team coordination, and post-incident reliability improvements for platform and AI services.',
+      'Partner closely with Product and Engineering to translate recurring customer issues into roadmap priorities and platform reliability initiatives.',
+      'Drive AI-assisted support tooling and automation within the AI Services vertical to reduce repetitive queries and improve resolution times.'
+    ],
+  },
+  {
+    id: '2',
     company: 'Hevo Technologies Pvt Ltd',
     position: 'Technical Operations Manager',
-    duration: '2022 - Present',
+    duration: '2022 - 2026',
     location: 'Bengaluru, Karnataka',
     description: [
       'Led a 15+ member L1/L2 technical support team delivering 24x7 support for 2000+ global customers.',
@@ -113,7 +127,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: '2',
+    id: '3',
     company: 'Hevo Technologies Pvt Ltd',
     position: 'Product Support Engineer',
     duration: '2019 - 2022',
@@ -127,7 +141,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: '3',
+    id: '4',
     company: 'Sprinklr',
     position: 'Product Support Engineer',
     duration: '2018 - 2019',
@@ -140,7 +154,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: '4',
+    id: '5',
     company: 'Yahoo! Inc.',
     position: 'Technical Solutions Engineer',
     duration: '2015 - 2018',
@@ -152,7 +166,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: '5',
+    id: '6',
     company: 'Minacs',
     position: 'Associate Analyst',
     duration: '2014 - 2015',
@@ -358,15 +372,15 @@ export const tools: Tool[] = [
 
 export const personalInfo = {
   name: 'Arun Sundararajan',
-  title: 'Technical Operations Manager',
+  title: 'Senior Technical Support Manager',
   email: 'arunsunderraj17@gmail.com',
   phone: '+91 8197882503',
   location: 'Bengaluru, Karnataka',
-  bio: "Cloud SaaS leader with 13+ years spanning technical support, operations leadership, and product management. I enjoy understanding how systems break in the real world and turning those lessons into platform reliability improvements.",
+  bio: "Senior Technical Support Manager at Exotel with 13+ years in the technical support domain, now leading the Platform and AI Services verticals on a CPaaS platform. I enjoy understanding how systems break in the real world and turning those lessons into platform reliability improvements.",
   bioExtended: [
-    "Technical Operations Leader driving excellence at the intersection of Support, Engineering, and Product. Currently leading 24x7 global support operations for 1,000+ customers on a cloud ETL platform, improving SLA adherence to >95%, reducing MTTR by 28%, and converting production failures into product reliability initiatives.",
-    "10+ years building high-performing support teams, mentoring technical leaders, and translating customer pain into roadmap priorities. Deep expertise across cloud platforms (AWS, GCP, Azure), distributed data pipelines, and enterprise escalation management.",
-    "Proven track record of turning support from a cost center into a strategic product advantage through OKR-driven execution, automation initiatives, and cross-functional stakeholder alignment."
+    "Senior Technical Support Manager at Exotel, where I lead support for the Platform and AI Services verticals on a CPaaS (Communications Platform-as-a-Service) stack spanning voice, messaging, and conversational AI. My focus is escalation and reliability ownership, building and mentoring the support team, and partnering closely with Product and Engineering to turn customer signal into platform improvements.",
+    "13+ years in the technical support domain — building high-performing teams, running enterprise escalation and P0/P1 incident management, and translating customer pain into roadmap priorities. As Technical Operations Manager at Hevo, I led 24x7 global support for a cloud ETL platform, lifting SLA adherence to >95% and reducing MTTR by 28%.",
+    "I care about turning support from a cost center into a strategic product advantage — through AI-assisted support tooling, automation, and OKR-driven execution across Support, Engineering, and Product."
   ],
   socialLinks: {
     github: 'https://github.com/legolasan',

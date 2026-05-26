@@ -54,6 +54,7 @@ src/
 - `/admin/resumes` - Resume download tracking
 - `/admin/client-projects` - Client project management
 - `/admin/client-feedback` - Client feedback management (view, categorize, resolve)
+- `/admin/settings` - Feature flag toggles (resume download, services page) — see Feature Flags section
 - `/blogs/admin/` - Blog-specific admin (posts, categories, tags, comments)
 - `stats.legolasan.in` - Real-time system monitoring dashboard (standalone service, not part of portfolio)
 
@@ -142,6 +143,21 @@ Flask apps served under a subpath need proper URL generation:
 
 **Important:** If templates use hardcoded URLs like `href="/concepts"`, they will 404 when served under `/learn/unix/`. Always use `url_for('blueprint.route_name')` in Flask templates.
 
+## Feature Flags
+
+Admin-togglable flags that show/hide whole features. Controlled from `/admin/settings` via `/api/admin/feature-flags` (admin-only).
+
+| Flag | Env Var | Controls |
+|------|---------|----------|
+| `resumeDownload` | `NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD` | Resume download button (`ResumeModal`) |
+| `services` | `NEXT_PUBLIC_ENABLE_SERVICES` | `/services` page + nav link |
+
+**How it works (important, unusual pattern):** Toggling a flag rewrites the `.env` file on disk, then — in production only (`NODE_ENV === 'production'`) — fires `npm run build && pm2 restart portfolio` as a fire-and-forget background process. The API returns immediately with `rebuilding: true`; the app is briefly unavailable while it rebuilds. Because these are `NEXT_PUBLIC_*` vars baked in at build time, a rebuild is the only way the change takes effect on the client. In dev, the `.env` is updated but no rebuild is triggered.
+
+## Services Page
+
+`/services` is a B2B offering page (gated behind the `services` feature flag). Inquiries flow through `ServiceInquiryModal` → `/api/resume-request`, which **blocks personal email domains** (gmail, outlook, yahoo, etc. — see `BLOCKED_DOMAINS` in the route) to keep it business-only. This is separate from `/api/resume-downloads`, which tracks actual resume file downloads.
+
 ## Client Feedback System
 
 Embeddable feedback widget for client projects. Allows clients to submit feedback with screenshots, element selection, and context.
@@ -227,6 +243,7 @@ Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`)
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/analytics/track` | POST | Track page views with geo data |
+| `/api/analytics/stats` | GET | Aggregated analytics stats, `?days=N` window (admin only) |
 | `/api/analytics/backfill-geo` | POST | Backfill geo data for existing records (admin only) |
 | `/api/chat` | POST | AI chatbot (SSE streaming with rate limits) |
 | `/api/auth/*` | GET/POST | NextAuth.js authentication |
@@ -238,9 +255,13 @@ Tables use `@@map()` for snake_case naming (e.g., `blog_posts`, `chat_sessions`)
 | `/api/chats` | GET | Chat history (admin only) |
 | `/api/github/*` | GET | GitHub stats proxy |
 | `/api/resume-downloads` | POST | Track resume downloads with email |
+| `/api/resume-request` | POST | Services-page inquiry; blocks personal email domains (business-only) |
 | `/api/upload` | POST | File upload handler |
+| `/api/client-projects` | GET/POST | Client project CRUD (admin only) |
+| `/api/client-projects/[slug]` | GET/PUT/DELETE | Single client project by slug |
 | `/api/client-feedback` | GET/POST/PUT | Client feedback system (CORS-enabled, token or admin auth) |
 | `/api/client-feedback/export` | GET | Export feedback as CSV/JSON (admin only) |
+| `/api/admin/feature-flags` | GET/POST | Read/toggle feature flags (admin only, rewrites .env + rebuilds) |
 
 **Stats API (Standalone Service on port 5004):**
 | `stats.legolasan.in/api/system` | GET | System resources (CPU, memory, disk, uptime) |
@@ -281,6 +302,7 @@ Required in `.env`:
 - `GOOGLE_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET` - OAuth providers
 - `OPENAI_API_KEY` - AI chatbot
 - `NEXT_PUBLIC_EMAILJS_*` - Contact form (service ID, template ID, public key)
+- `NEXT_PUBLIC_ENABLE_RESUME_DOWNLOAD`, `NEXT_PUBLIC_ENABLE_SERVICES` - Feature flags (`"true"`/`"false"`); managed via `/admin/settings`, require rebuild to take effect
 
 ## Deployment
 
